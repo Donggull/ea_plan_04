@@ -42,14 +42,14 @@ export function MainLayout() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="min-h-screen" style={{ backgroundColor: 'var(--linear-bg-primary)' }}>
       {/* Header */}
       <Header
         onToggleSidebar={toggleSidebar}
       />
 
       {/* Layout Container */}
-      <div className="flex">
+      <div className="linear-flex">
         {/* Sidebar */}
         <Sidebar
           isOpen={isSidebarOpen}
@@ -59,14 +59,23 @@ export function MainLayout() {
         {/* Main Content Area */}
         <main
           className={cn(
-            'flex-1 pt-16 transition-all duration-300',
+            'flex-1 transition-all',
             // 사이드바가 열려있을 때 마진 조정 (데스크톱만)
             !isMobile && isSidebarOpen ? 'lg:ml-64 xl:ml-80' : 'ml-0'
           )}
+          style={{
+            paddingTop: 'var(--linear-header-height)',
+            transitionDuration: 'var(--linear-animation-normal)',
+            transitionTimingFunction: 'var(--linear-ease-out)'
+          }}
         >
-          <div className="container mx-auto px-4 py-6 max-w-7xl">
+          <div className="linear-container-lg" style={{
+            padding: 'var(--linear-spacing-lg)',
+            maxWidth: '1440px',
+            margin: '0 auto'
+          }}>
             {/* 메인 콘텐츠 영역 */}
-            <div className="min-h-[calc(100vh-8rem)]">
+            <div style={{ minHeight: 'calc(100vh - var(--linear-header-height) - 3rem)' }}>
               <Outlet />
             </div>
           </div>
