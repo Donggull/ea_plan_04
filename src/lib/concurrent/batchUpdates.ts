@@ -204,12 +204,14 @@ export function compatibleBatch(updates: Array<() => void>) {
 }
 
 // 우선순위 기반 배치 업데이트
-export enum UpdatePriority {
-  IMMEDIATE = 0,
-  HIGH = 1,
-  NORMAL = 2,
-  LOW = 3
-}
+export const UpdatePriority = {
+  IMMEDIATE: 0,
+  HIGH: 1,
+  NORMAL: 2,
+  LOW: 3
+} as const
+
+export type UpdatePriority = typeof UpdatePriority[keyof typeof UpdatePriority]
 
 class PriorityBatchQueue {
   private queues: Record<UpdatePriority, Array<() => void>> = {

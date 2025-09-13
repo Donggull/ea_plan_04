@@ -2,7 +2,7 @@
  * React 19 DevTools Profiler 활용 유틸리티
  * 성능 모니터링 및 최적화 도구
  */
-import { Profiler, ProfilerOnRenderCallback, ReactNode, useState, useEffect, useMemo } from 'react'
+import { Profiler, type ProfilerOnRenderCallback, type ReactNode, useState, useEffect, useMemo } from 'react'
 
 // 성능 메트릭 타입
 interface PerformanceMetric {
@@ -161,14 +161,14 @@ export function ReactProfiler({
   onSlowRender,
   threshold = PERFORMANCE_THRESHOLDS.SLOW_RENDER
 }: ReactProfilerProps) {
-  const onRender: ProfilerOnRenderCallback = (
-    id,
-    phase,
-    actualDuration,
-    baseDuration,
-    startTime,
-    commitTime,
-    interactions
+  const onRender = (
+    id: string,
+    phase: 'mount' | 'update',
+    actualDuration: number,
+    baseDuration: number,
+    startTime: number,
+    commitTime: number,
+    interactions: Set<any>
   ) => {
     if (!enabled) return
 
@@ -206,7 +206,7 @@ export function ReactProfiler({
   }
 
   return (
-    <Profiler id={id} onRender={onRender}>
+    <Profiler id={id} onRender={onRender as ProfilerOnRenderCallback}>
       {children}
     </Profiler>
   )

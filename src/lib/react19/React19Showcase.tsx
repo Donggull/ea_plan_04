@@ -2,11 +2,10 @@
  * React 19 새로운 기능들을 보여주는 예시 컴포넌트
  * 개발 및 테스트 목적
  */
-import { useState, useDeferredValue, useTransition, Suspense } from 'react'
+import { useState, useDeferredValue, useTransition } from 'react'
 import { useAuth } from '@/hooks/useAuth'
 import {
   useProjectData,
-  useProject,
   preloadProjectData
 } from '@/hooks/useProjectData'
 import {
@@ -16,31 +15,23 @@ import {
 } from '@/lib/performance/ReactProfiler'
 import {
   EnhancedLoading,
-  SuspenseLoading,
   useLoadingState
 } from '@/components/loading/EnhancedLoadingStates'
 import {
-  EnhancedErrorBoundary,
   SuspenseErrorBoundary
 } from '@/components/error/EnhancedErrorBoundary'
 import {
-  batchUpdates,
-  createOptimizedUpdater
+  batchUpdates
 } from '@/lib/concurrent/batchUpdates'
 
 export function React19ShowcaseComponent() {
   const { user } = useAuth()
   const [searchTerm, setSearchTerm] = useState('')
-  const [filterType, setFilterType] = useState('all')
   const [isPending, startTransition] = useTransition()
   const loadingState = useLoadingState()
 
   // useDeferredValue 예시
   const deferredSearchTerm = useDeferredValue(searchTerm)
-  const deferredFilterType = useDeferredValue(filterType)
-
-  // 최적화된 상태 업데이트
-  const optimizedSetSearch = createOptimizedUpdater(setSearchTerm)
 
   // 성능 모니터링
   const performanceStats = usePerformanceStats('React19Showcase')
@@ -57,7 +48,6 @@ export function React19ShowcaseComponent() {
   const handleBatchUpdate = () => {
     batchUpdates.addMultiple([
       () => setSearchTerm('배치 업데이트'),
-      () => setFilterType('active'),
       () => loadingState.setProgress(100)
     ])
   }
@@ -235,7 +225,7 @@ function ProjectDataDemo({ userId }: { userId: string }) {
         <ul className="space-y-1">
           {projects.slice(0, 3).map((project) => (
             <li key={project.id} className="p-2 bg-gray-50 rounded">
-              <span className="font-medium">{project.title}</span>
+              <span className="font-medium">{project.name}</span>
               <span className="ml-2 text-sm text-gray-600">({project.status})</span>
             </li>
           ))}

@@ -75,7 +75,7 @@ export function createServerDataFetcher<T>(
       if (result.error) {
         return {
           data: null,
-          error: result.error.message || 'Unknown error',
+          error: (result.error as any)?.message || 'Unknown error',
           loading: false
         }
       }

@@ -5,7 +5,7 @@
 import { use, useMemo, useCallback, useSyncExternalStore } from 'react'
 import { projectQueries } from '@/lib/supabase/queries'
 import { projectServerFetcher, cacheInvalidation } from '@/lib/server-components'
-import type { Project } from '@/types/database'
+import { type Project } from '@/types/database'
 
 // Promise 상태 관리를 위한 타입
 interface PromiseState<T> {
@@ -37,7 +37,7 @@ class PromiseCache {
         })
     }
 
-    return this.promises.get(key)!
+    return this.promises.get(key) as Promise<T>
   }
 
   invalidate(key: string) {
@@ -46,7 +46,8 @@ class PromiseCache {
   }
 
   getState<T>(key: string): PromiseState<T> | undefined {
-    return this.states.get(key)
+    const state = this.states.get(key)
+    return state ? { ...state, value: state.value as T } : undefined
   }
 }
 
@@ -113,7 +114,12 @@ export function useProjectData(userId: string) {
 
   // 프로젝트 생성
   const createProject = useCallback(async (projectData: Omit<Project, 'id' | 'created_at' | 'updated_at'>) => {
-    const result = await projectQueries.createProject(projectData)
+    const { metadata, ...rest } = projectData
+    const createData = {
+      ...rest,
+      metadata: metadata as any // Json 타입으로 캐스팅
+    }
+    const result = await projectQueries.createProject(createData)
     if (result.error) {
       throw new Error(result.error.message || 'Failed to create project')
     }
@@ -126,7 +132,12 @@ export function useProjectData(userId: string) {
 
   // 프로젝트 업데이트
   const updateProject = useCallback(async (projectId: string, updates: Partial<Project>) => {
-    const result = await projectQueries.updateProject(projectId, updates)
+    const { metadata, ...rest } = updates
+    const updateData = {
+      ...rest,
+      ...(metadata && { metadata: metadata as any })
+    }
+    const result = await projectQueries.updateProject(projectId, updateData)
     if (result.error) {
       throw new Error(result.error.message || 'Failed to update project')
     }
@@ -161,7 +172,12 @@ export function useProject(projectId: string) {
   }, [projectId])
 
   const updateProject = useCallback(async (updates: Partial<Project>) => {
-    const result = await projectQueries.updateProject(projectId, updates)
+    const { metadata, ...rest } = updates
+    const updateData = {
+      ...rest,
+      ...(metadata && { metadata: metadata as any })
+    }
+    const result = await projectQueries.updateProject(projectId, updateData)
     if (result.error) {
       throw new Error(result.error.message || 'Failed to update project')
     }

@@ -2,7 +2,7 @@
  * React 19 향상된 Error Boundary
  * 새로운 Suspense 기능과 통합된 에러 처리
  */
-import { Component, ErrorInfo, ReactNode, Suspense } from 'react'
+import { Component, type ErrorInfo, type ReactNode, Suspense } from 'react'
 import { AlertTriangle, RefreshCw, Home, Bug } from 'lucide-react'
 
 interface ErrorBoundaryState {

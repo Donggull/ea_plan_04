@@ -2,7 +2,7 @@
  * React 19 향상된 Loading States
  * Suspense와 통합된 로딩 상태 관리
  */
-import { ReactNode, useState, useEffect, useMemo, Suspense } from 'react'
+import { type ReactNode, useState, useEffect, Suspense } from 'react'
 import { Loader2, RefreshCw, Wifi, WifiOff } from 'lucide-react'
 
 // 로딩 상태 타입
