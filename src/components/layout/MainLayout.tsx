@@ -44,40 +44,34 @@ export function MainLayout() {
   return (
     <div className="min-h-screen" style={{ backgroundColor: 'var(--linear-bg-primary)' }}>
       {/* Header */}
-      <Header
-        onToggleSidebar={toggleSidebar}
-      />
+      <Header onToggleSidebar={toggleSidebar} />
 
       {/* Layout Container */}
-      <div className="linear-flex">
+      <div className="flex">
         {/* Sidebar */}
-        <Sidebar
-          isOpen={isSidebarOpen}
-          onClose={closeSidebar}
-        />
+        <Sidebar isOpen={isSidebarOpen} onClose={closeSidebar} />
 
         {/* Main Content Area */}
         <main
           className={cn(
-            'flex-1 transition-all',
+            'flex-1 transition-all duration-300 ease-out',
             // 사이드바가 열려있을 때 마진 조정 (데스크톱만)
             !isMobile && isSidebarOpen ? 'lg:ml-64 xl:ml-80' : 'ml-0'
           )}
           style={{
-            paddingTop: 'var(--linear-header-height)',
-            transitionDuration: 'var(--linear-animation-normal)',
-            transitionTimingFunction: 'var(--linear-ease-out)'
+            paddingTop: '0',
+            backgroundColor: 'var(--linear-bg-primary)',
+            minHeight: 'calc(100vh - var(--linear-header-height))'
           }}
         >
-          <div className="linear-container-lg" style={{
-            padding: 'var(--linear-spacing-lg)',
-            maxWidth: '1440px',
-            margin: '0 auto'
-          }}>
-            {/* 메인 콘텐츠 영역 */}
-            <div style={{ minHeight: 'calc(100vh - var(--linear-header-height) - 3rem)' }}>
-              <Outlet />
-            </div>
+          <div
+            className="w-full max-w-full"
+            style={{
+              padding: 'var(--linear-spacing-lg)',
+              paddingTop: 'var(--linear-spacing-md)'
+            }}
+          >
+            <Outlet />
           </div>
         </main>
       </div>

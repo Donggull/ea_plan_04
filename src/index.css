@@ -384,15 +384,11 @@ body {
 
 /* Navigation Components */
 .linear-navigation {
-  background: rgba(8, 9, 16, 0.85);
+  background: rgba(8, 9, 16, 0.95);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border-bottom: 1px solid var(--linear-border-primary);
   height: var(--linear-header-height);
-  padding: 0 var(--linear-spacing-lg);
-  position: sticky;
-  top: 0;
-  z-index: 50;
   transition: all var(--linear-animation-fast) var(--linear-ease-out);
 }
 

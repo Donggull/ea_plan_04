@@ -126,28 +126,25 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
           <button
             onClick={() => toggleExpanded(item.id)}
             className={cn(
-              'linear-sidebar-item w-full',
-              isActive && 'active',
+              'w-full flex items-center justify-between px-3 py-2 text-sm transition-colors rounded-lg',
+              isActive ? 'text-blue-400 bg-blue-500/10' : 'text-gray-300 hover:text-white hover:bg-gray-800',
               level > 0 && 'ml-4'
             )}
           >
-            <div className="linear-flex-start linear-gap-sm">
+            <div className="flex items-center gap-3">
               <Icon className={cn(
                 'w-5 h-5',
-                isActive ? 'linear-accent-blue' : 'linear-text-tertiary'
+                isActive ? 'text-blue-400' : 'text-gray-400'
               )} />
-              <span className={cn(
-                'linear-text-regular font-medium',
-                isActive ? 'linear-accent-blue' : 'linear-text-secondary'
-              )}>
+              <span className="font-medium">
                 {item.title}
               </span>
             </div>
             {hasChildren && (
               isExpanded ? (
-                <ChevronDown className="w-4 h-4 linear-text-muted" />
+                <ChevronDown className="w-4 h-4 text-gray-500" />
               ) : (
-                <ChevronRight className="w-4 h-4 linear-text-muted" />
+                <ChevronRight className="w-4 h-4 text-gray-500" />
               )
             )}
           </button>
@@ -156,19 +153,19 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
             to={item.path!}
             onClick={onClose}
             className={({ isActive }) => cn(
-              'linear-sidebar-item',
-              isActive && 'active',
+              'flex items-center gap-3 px-3 py-2 text-sm transition-colors rounded-lg',
+              isActive ? 'text-blue-400 bg-blue-500/10 border-l-2 border-blue-400' : 'text-gray-300 hover:text-white hover:bg-gray-800',
               level > 0 && 'ml-4'
             )}
           >
             <Icon className="w-5 h-5" />
-            <span className="linear-text-regular font-medium">{item.title}</span>
+            <span className="font-medium">{item.title}</span>
           </NavLink>
         )}
 
         {/* 하위 메뉴 아이템들 */}
         {hasChildren && isExpanded && (
-          <div className="ml-4 linear-gap-xs">
+          <div className="ml-6 space-y-1">
             {item.children!.map(child => renderMenuItem(child, level + 1))}
           </div>
         )}
@@ -189,31 +186,31 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
       {/* 사이드바 */}
       <aside
         className={cn(
-          'linear-sidebar transition-transform duration-linear-normal',
-          'w-64 lg:w-80',
+          'fixed top-16 left-0 h-[calc(100vh-4rem)] w-64 lg:w-80 z-40',
+          'bg-gray-900 border-r border-gray-700 transition-transform duration-300',
           isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
         )}
       >
-        <div className="linear-flex-col h-full">
+        <div className="flex flex-col h-full">
           {/* 사이드바 헤더 */}
-          <div className="linear-sidebar-group">
-            <h2 className="linear-sidebar-title">
+          <div className="p-6 border-b border-gray-700">
+            <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-wider">
               프로젝트 메뉴
             </h2>
           </div>
 
           {/* 메뉴 아이템들 */}
           <nav className="flex-1 overflow-y-auto py-4">
-            <div className="linear-gap-xs">
+            <div className="space-y-1 px-3">
               {menuItems.map(item => renderMenuItem(item))}
             </div>
           </nav>
 
           {/* 사이드바 푸터 */}
-          <div className="linear-sidebar-group">
-            <button className="linear-sidebar-item w-full">
+          <div className="p-3 border-t border-gray-700">
+            <button className="w-full flex items-center gap-3 px-3 py-2 text-sm text-gray-300 hover:text-white hover:bg-gray-800 rounded-lg transition-colors">
               <HelpCircle className="w-5 h-5" />
-              <span className="linear-text-regular">도움말</span>
+              <span>도움말</span>
             </button>
           </div>
         </div>
