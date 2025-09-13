@@ -204,16 +204,21 @@ function App() {
           {/* 404 Not Found */}
           <Route path="*" element={<NotFoundPage />} />
         </Routes>
-            </BrowserRouter>
+                </BrowserRouter>
+              </NetworkAwareLoading>
 
-            {/* React Query DevTools (개발 환경에서만) */}
-            {process.env.NODE_ENV === 'development' && (
-              <ReactQueryDevtools initialIsOpen={false} />
-            )}
-          </AuthProvider>
-        </ThemeProvider>
-      </QueryClientProvider>
-    </ErrorBoundary>
+              {/* Development Tools */}
+              {process.env.NODE_ENV === 'development' && (
+                <>
+                  <ReactQueryDevtools initialIsOpen={false} />
+                  <PerformanceDashboard />
+                </>
+              )}
+            </AuthProvider>
+          </ThemeProvider>
+        </QueryClientProvider>
+      </EnhancedErrorBoundary>
+    </ReactProfiler>
   )
 }
 

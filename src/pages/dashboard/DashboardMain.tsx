@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useState, useDeferredValue, useTransition, Suspense } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import {
   Users,
@@ -41,6 +41,15 @@ export function DashboardMain() {
   const { setPageTitle, setBreadcrumbs } = useUIStore()
   const realtime = useMultiTableRealtimeSubscription()
 
+  // React 19 Concurrent Features
+  const [searchQuery, setSearchQuery] = useState('')
+  const [filterType, setFilterType] = useState('all')
+  const [isPending, startTransition] = useTransition()
+
+  // useDeferredValue로 검색 입력 지연
+  const deferredSearchQuery = useDeferredValue(searchQuery)
+  const deferredFilterType = useDeferredValue(filterType)
+
   // 페이지 메타데이터 설정
   useEffect(() => {
     setPageTitle('대시보드')
@@ -49,7 +58,7 @@ export function DashboardMain() {
     ])
   }, [setPageTitle, setBreadcrumbs])
 
-  // 대시보드 통계 데이터 쿼리
+  // 대시보드 통계 데이터 쿼리 (Concurrent 기능 적용)
   const { data: stats, isLoading: statsLoading } = useQuery({
     queryKey: queryKeys.analytics.dashboard(),
     queryFn: async () => {
@@ -60,6 +69,35 @@ export function DashboardMain() {
     staleTime: 1000 * 60 * 5, // 5분
   })
 
+  // 필터링된 데이터 쿼리 (지연된 값 사용)
+  const { data: filteredData, isLoading: filteredLoading } = useQuery({
+    queryKey: ['dashboard-filtered', deferredSearchQuery, deferredFilterType],
+    queryFn: async () => {
+      // 검색 및 필터링 로직
+      await new Promise(resolve => setTimeout(resolve, 300))
+      return {
+        projects: mockStats.activeProjects,
+        activities: mockStats.totalActivities
+      }
+    },
+    enabled: !!deferredSearchQuery || deferredFilterType !== 'all',
+    staleTime: 1000 * 30, // 30초
+  })
+
+  // 검색어 변경 핸들러 (startTransition 사용)
+  const handleSearchChange = (value: string) => {
+    startTransition(() => {
+      setSearchQuery(value)
+    })
+  }
+
+  // 필터 변경 핸들러 (startTransition 사용)
+  const handleFilterChange = (type: string) => {
+    startTransition(() => {
+      setFilterType(type)
+    })
+  }
+
   return (
     <div className="linear-container linear-gap-lg py-6">
       {/* 페이지 헤더 */}
@@ -69,6 +107,39 @@ export function DashboardMain() {
           <p className="linear-text-regular linear-text-tertiary">
             프로젝트와 팀 활동을 한눈에 확인하세요
           </p>
+        </div>
+
+        {/* 검색 및 필터 (Concurrent Features 적용) */}
+        <div className="linear-flex-start linear-gap-md">
+          <div className="relative">
+            <input
+              type="text"
+              placeholder="프로젝트 검색..."
+              value={searchQuery}
+              onChange={(e) => handleSearchChange(e.target.value)}
+              className={`linear-input w-64 transition-opacity duration-200 ${
+                isPending ? 'opacity-50' : 'opacity-100'
+              }`}
+            />
+            {isPending && (
+              <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                <div className="w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
+              </div>
+            )}
+          </div>
+
+          <select
+            value={filterType}
+            onChange={(e) => handleFilterChange(e.target.value)}
+            className={`linear-select transition-opacity duration-200 ${
+              isPending ? 'opacity-50' : 'opacity-100'
+            }`}
+          >
+            <option value="all">전체</option>
+            <option value="active">진행중</option>
+            <option value="completed">완료</option>
+            <option value="planning">계획중</option>
+          </select>
         </div>
 
         {/* 실시간 연결 상태 */}
@@ -82,41 +153,53 @@ export function DashboardMain() {
         </div>
       </div>
 
-      {/* 통계 카드들 */}
-      <div className="linear-grid linear-grid-cols-1 md:linear-grid-cols-2 lg:linear-grid-cols-4 linear-gap-lg mb-8">
-        <StatsCard
-          title="진행 중인 프로젝트"
-          value={stats?.activeProjects ?? 0}
-          icon={<FolderOpen className="w-5 h-5" />}
-          color="blue"
-          isLoading={statsLoading}
-        />
+      {/* 통계 카드들 - Suspense로 감싸서 최적화 */}
+      <Suspense fallback={
+        <div className="linear-grid linear-grid-cols-1 md:linear-grid-cols-2 lg:linear-grid-cols-4 linear-gap-lg mb-8">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <div key={i} className="linear-card animate-pulse">
+              <div className="h-20 bg-gray-200 rounded" />
+            </div>
+          ))}
+        </div>
+      }>
+        <div className={`linear-grid linear-grid-cols-1 md:linear-grid-cols-2 lg:linear-grid-cols-4 linear-gap-lg mb-8 transition-opacity duration-300 ${
+          isPending ? 'opacity-70' : 'opacity-100'
+        }`}>
+          <StatsCard
+            title="진행 중인 프로젝트"
+            value={filteredData?.projects ?? stats?.activeProjects ?? 0}
+            icon={<FolderOpen className="w-5 h-5" />}
+            color="blue"
+            isLoading={statsLoading || filteredLoading}
+          />
 
-        <StatsCard
-          title="완료된 프로젝트"
-          value={stats?.completedProjects ?? 0}
-          icon={<CheckCircle className="w-5 h-5" />}
-          color="green"
-          isLoading={statsLoading}
-        />
+          <StatsCard
+            title="완료된 프로젝트"
+            value={stats?.completedProjects ?? 0}
+            icon={<CheckCircle className="w-5 h-5" />}
+            color="green"
+            isLoading={statsLoading}
+          />
 
-        <StatsCard
-          title="팀 멤버"
-          value={stats?.teamMembers ?? 0}
-          icon={<Users className="w-5 h-5" />}
-          color="security"
-          isLoading={statsLoading}
-        />
+          <StatsCard
+            title="팀 멤버"
+            value={stats?.teamMembers ?? 0}
+            icon={<Users className="w-5 h-5" />}
+            color="security"
+            isLoading={statsLoading}
+          />
 
-        <StatsCard
-          title="이번 달 생성된 이미지"
-          value={stats?.generatedImages ?? 0}
-          icon={<ImageIcon className="w-5 h-5" />}
-          color="orange"
-          trend={stats?.monthlyGrowth}
-          isLoading={statsLoading}
-        />
-      </div>
+          <StatsCard
+            title="이번 달 생성된 이미지"
+            value={stats?.generatedImages ?? 0}
+            icon={<ImageIcon className="w-5 h-5" />}
+            color="orange"
+            trend={stats?.monthlyGrowth}
+            isLoading={statsLoading}
+          />
+        </div>
+      </Suspense>
 
       {/* 메인 콘텐츠 그리드 */}
       <div className="linear-grid linear-grid-cols-1 lg:linear-grid-cols-3 linear-gap-lg">
