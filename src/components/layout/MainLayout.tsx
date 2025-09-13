@@ -46,22 +46,16 @@ export function MainLayout() {
       <Header onToggleSidebar={toggleSidebar} />
 
       {/* Layout Container */}
-      <div className="flex">
+      <div className="flex h-[calc(100vh-64px)]">
         {/* Sidebar */}
         <Sidebar isOpen={isSidebarOpen} onClose={closeSidebar} />
 
         {/* Main Content Area */}
-        <main
-          className="flex-1 lg:ml-64"
-          style={{
-            paddingTop: '0',
-            backgroundColor: 'var(--linear-bg-primary)',
-            minHeight: 'calc(100vh - var(--linear-header-height))'
-          }}
-        >
+        <main className="flex-1 overflow-auto lg:ml-0">
           <div
-            className="w-full max-w-full"
+            className="w-full h-full"
             style={{
+              backgroundColor: 'var(--linear-bg-primary)',
               padding: 'var(--linear-spacing-lg)',
               paddingTop: 'var(--linear-spacing-md)'
             }}
