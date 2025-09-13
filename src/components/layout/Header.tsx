@@ -85,13 +85,12 @@ export function Header({ onToggleSidebar }: HeaderProps) {
               <input
                 type="text"
                 placeholder="검색..."
-                className="w-full pl-10 pr-4 py-2 rounded-lg text-sm transition-all duration-200 focus:outline-none focus:ring-2"
+                className="w-full pl-10 pr-4 py-2 rounded-lg text-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 style={{
                   backgroundColor: 'var(--linear-bg-tertiary)',
                   borderColor: 'var(--linear-border-primary)',
                   color: 'var(--linear-text-primary)',
-                  border: '1px solid var(--linear-border-primary)',
-                  focusRingColor: 'var(--linear-accent-blue)'
+                  border: '1px solid var(--linear-border-primary)'
                 }}
               />
             </div>
