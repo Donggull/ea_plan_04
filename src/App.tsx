@@ -1,6 +1,11 @@
 import { Suspense, lazy } from 'react'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { ErrorBoundary } from 'react-error-boundary'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
+
+// Query Client
+import { queryClient } from '@/lib/react-query'
 
 // Providers
 import { ThemeProvider } from '@/contexts/ThemeContext'
@@ -66,9 +71,10 @@ function LoadingSpinner() {
 function App() {
   return (
     <ErrorBoundary FallbackComponent={ErrorFallback}>
-      <ThemeProvider>
-        <AuthProvider>
-          <BrowserRouter>
+      <QueryClientProvider client={queryClient}>
+        <ThemeProvider>
+          <AuthProvider>
+            <BrowserRouter>
           <Routes>
           {/* Public Routes */}
           <Route path="/login" element={<LoginPage />} />
@@ -198,9 +204,15 @@ function App() {
           {/* 404 Not Found */}
           <Route path="*" element={<NotFoundPage />} />
         </Routes>
-          </BrowserRouter>
-        </AuthProvider>
-      </ThemeProvider>
+            </BrowserRouter>
+
+            {/* React Query DevTools (개발 환경에서만) */}
+            {process.env.NODE_ENV === 'development' && (
+              <ReactQueryDevtools initialIsOpen={false} />
+            )}
+          </AuthProvider>
+        </ThemeProvider>
+      </QueryClientProvider>
     </ErrorBoundary>
   )
 }
