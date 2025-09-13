@@ -15,6 +15,29 @@ export default defineConfig({
       "@/stores": path.resolve(__dirname, "./src/stores"),
       "@/pages": path.resolve(__dirname, "./src/pages"),
       "@/utils": path.resolve(__dirname, "./src/utils"),
+      "@/styles": path.resolve(__dirname, "./src/styles"),
+      "@/assets": path.resolve(__dirname, "./src/assets"),
     },
+  },
+  server: {
+    port: 3000,
+    host: true,
+    open: true,
+  },
+  build: {
+    target: 'esnext',
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          vendor: ['react', 'react-dom'],
+          supabase: ['@supabase/supabase-js'],
+          ai: ['openai', '@google/generative-ai', '@anthropic-ai/sdk'],
+          ui: ['@radix-ui/react-dialog', '@radix-ui/react-dropdown-menu', 'lucide-react'],
+        },
+      },
+    },
+  },
+  optimizeDeps: {
+    include: ['react', 'react-dom', '@supabase/supabase-js'],
   },
 })
