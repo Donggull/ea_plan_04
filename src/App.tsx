@@ -1,8 +1,12 @@
 import { Suspense, lazy } from 'react'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
-import { ErrorBoundary } from 'react-error-boundary'
 import { QueryClientProvider } from '@tanstack/react-query'
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
+
+// React 19 Enhanced Components
+import { EnhancedErrorBoundary, SuspenseErrorBoundary } from '@/components/error/EnhancedErrorBoundary'
+import { EnhancedLoading, NetworkAwareLoading } from '@/components/loading/EnhancedLoadingStates'
+import { ReactProfiler, PerformanceDashboard } from '@/lib/performance/ReactProfiler'
 
 // Query Client
 import { queryClient } from '@/lib/react-query'
@@ -41,169 +45,229 @@ const ChatbotCustomBotPage = lazy(() => import('@/pages/chatbot/CustomBotPage').
 
 const ImageGenerationPage = lazy(() => import('@/pages/image-gen/ImageGenerationPage').then(module => ({ default: module.ImageGenerationPage })))
 
-// Error Fallback Component
-function ErrorFallback({ error, resetErrorBoundary }: { error: Error; resetErrorBoundary: () => void }) {
+// React 19 Enhanced Loading Component
+function EnhancedLoadingFallback({ message = '페이지를 로드하는 중...' }: { message?: string }) {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
-      <div className="text-center">
-        <h2 className="text-2xl font-bold text-red-600 mb-4">오류가 발생했습니다</h2>
-        <p className="text-gray-600 dark:text-gray-400 mb-4">{error.message}</p>
-        <button
-          onClick={resetErrorBoundary}
-          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-        >
-          다시 시도
-        </button>
-      </div>
-    </div>
-  )
-}
-
-// Loading Component
-function LoadingSpinner() {
-  return (
-    <div className="flex items-center justify-center min-h-[400px]">
-      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-    </div>
+    <EnhancedLoading
+      state={{
+        isLoading: true,
+        message,
+        progress: undefined
+      }}
+      variant="skeleton"
+      showMessage
+      className="min-h-[400px]"
+    />
   )
 }
 
 function App() {
   return (
-    <ErrorBoundary FallbackComponent={ErrorFallback}>
-      <QueryClientProvider client={queryClient}>
-        <ThemeProvider>
-          <AuthProvider>
-            <BrowserRouter>
-          <Routes>
-          {/* Public Routes */}
-          <Route path="/login" element={<LoginPage />} />
+    <ReactProfiler id="App" enabled={process.env.NODE_ENV === 'development'}>
+      <EnhancedErrorBoundary
+        level="page"
+        maxRetries={3}
+        onError={(error, errorInfo) => {
+          // 에러 로깅 (실제 환경에서는 외부 서비스로 전송)
+          console.error('App Level Error:', { error, errorInfo })
+        }}
+      >
+        <QueryClientProvider client={queryClient}>
+          <ThemeProvider>
+            <AuthProvider>
+              <NetworkAwareLoading>
+                <BrowserRouter>
+                  <Routes>
+                    {/* Public Routes */}
+                    <Route path="/login" element={<LoginPage />} />
 
-          {/* Protected Routes */}
-          <Route
-            path="/"
-            element={
-              <ProtectedRoute>
-                <MainLayout />
-              </ProtectedRoute>
-            }
-          >
-            {/* Dashboard */}
-            <Route index element={<Navigate to="/dashboard" replace />} />
-            <Route path="dashboard" element={<DashboardPage />} />
+                    {/* Protected Routes */}
+                    <Route
+                      path="/"
+                      element={
+                        <ProtectedRoute>
+                          <MainLayout />
+                        </ProtectedRoute>
+                      }
+                    >
+                      {/* Dashboard */}
+                      <Route index element={<Navigate to="/dashboard" replace />} />
+                      <Route path="dashboard" element={<DashboardPage />} />
 
-            {/* Planning Module */}
-            <Route
-              path="planning/proposal"
-              element={
-                <Suspense fallback={<LoadingSpinner />}>
-                  <PlanningProposalPage />
-                </Suspense>
-              }
-            />
-            <Route
-              path="planning/construction"
-              element={
-                <Suspense fallback={<LoadingSpinner />}>
-                  <PlanningConstructionPage />
-                </Suspense>
-              }
-            />
-            <Route
-              path="planning/operation"
-              element={
-                <Suspense fallback={<LoadingSpinner />}>
-                  <PlanningOperationPage />
-                </Suspense>
-              }
-            />
+                      {/* Planning Module - Enhanced with React 19 features */}
+                      <Route
+                        path="planning/proposal"
+                        element={
+                          <SuspenseErrorBoundary
+                            level="feature"
+                            loadingFallback={<EnhancedLoadingFallback message="제안 페이지를 로드하는 중..." />}
+                            suspenseKey="planning-proposal"
+                          >
+                            <ReactProfiler id="PlanningProposal">
+                              <PlanningProposalPage />
+                            </ReactProfiler>
+                          </SuspenseErrorBoundary>
+                        }
+                      />
+                      <Route
+                        path="planning/construction"
+                        element={
+                          <SuspenseErrorBoundary
+                            level="feature"
+                            loadingFallback={<EnhancedLoadingFallback message="구축 페이지를 로드하는 중..." />}
+                            suspenseKey="planning-construction"
+                          >
+                            <ReactProfiler id="PlanningConstruction">
+                              <PlanningConstructionPage />
+                            </ReactProfiler>
+                          </SuspenseErrorBoundary>
+                        }
+                      />
+                      <Route
+                        path="planning/operation"
+                        element={
+                          <SuspenseErrorBoundary
+                            level="feature"
+                            loadingFallback={<EnhancedLoadingFallback message="운영 페이지를 로드하는 중..." />}
+                            suspenseKey="planning-operation"
+                          >
+                            <ReactProfiler id="PlanningOperation">
+                              <PlanningOperationPage />
+                            </ReactProfiler>
+                          </SuspenseErrorBoundary>
+                        }
+                      />
 
-            {/* Design Module */}
-            <Route
-              path="design/workflow"
-              element={
-                <Suspense fallback={<LoadingSpinner />}>
-                  <DesignWorkflowPage />
-                </Suspense>
-              }
-            />
-            <Route
-              path="design/resources"
-              element={
-                <Suspense fallback={<LoadingSpinner />}>
-                  <DesignResourcesPage />
-                </Suspense>
-              }
-            />
+                      {/* Design Module - Enhanced with React 19 features */}
+                      <Route
+                        path="design/workflow"
+                        element={
+                          <SuspenseErrorBoundary
+                            level="feature"
+                            loadingFallback={<EnhancedLoadingFallback message="워크플로우 페이지를 로드하는 중..." />}
+                            suspenseKey="design-workflow"
+                          >
+                            <ReactProfiler id="DesignWorkflow">
+                              <DesignWorkflowPage />
+                            </ReactProfiler>
+                          </SuspenseErrorBoundary>
+                        }
+                      />
+                      <Route
+                        path="design/resources"
+                        element={
+                          <SuspenseErrorBoundary
+                            level="feature"
+                            loadingFallback={<EnhancedLoadingFallback message="리소스 페이지를 로드하는 중..." />}
+                            suspenseKey="design-resources"
+                          >
+                            <ReactProfiler id="DesignResources">
+                              <DesignResourcesPage />
+                            </ReactProfiler>
+                          </SuspenseErrorBoundary>
+                        }
+                      />
 
-            {/* Publishing Module */}
-            <Route
-              path="publishing/canvas"
-              element={
-                <Suspense fallback={<LoadingSpinner />}>
-                  <PublishingCanvasPage />
-                </Suspense>
-              }
-            />
-            <Route
-              path="publishing/preview"
-              element={
-                <Suspense fallback={<LoadingSpinner />}>
-                  <PublishingPreviewPage />
-                </Suspense>
-              }
-            />
+                      {/* Other Modules - All enhanced with React 19 features */}
+                      <Route
+                        path="publishing/canvas"
+                        element={
+                          <SuspenseErrorBoundary
+                            level="feature"
+                            loadingFallback={<EnhancedLoadingFallback message="캔버스 페이지를 로드하는 중..." />}
+                          >
+                            <ReactProfiler id="PublishingCanvas">
+                              <PublishingCanvasPage />
+                            </ReactProfiler>
+                          </SuspenseErrorBoundary>
+                        }
+                      />
+                      <Route
+                        path="publishing/preview"
+                        element={
+                          <SuspenseErrorBoundary
+                            level="feature"
+                            loadingFallback={<EnhancedLoadingFallback message="미리보기 페이지를 로드하는 중..." />}
+                          >
+                            <ReactProfiler id="PublishingPreview">
+                              <PublishingPreviewPage />
+                            </ReactProfiler>
+                          </SuspenseErrorBoundary>
+                        }
+                      />
 
-            {/* Development Module */}
-            <Route
-              path="development/environment"
-              element={
-                <Suspense fallback={<LoadingSpinner />}>
-                  <DevelopmentEnvironmentPage />
-                </Suspense>
-              }
-            />
-            <Route
-              path="development/deployment"
-              element={
-                <Suspense fallback={<LoadingSpinner />}>
-                  <DevelopmentDeploymentPage />
-                </Suspense>
-              }
-            />
+                      <Route
+                        path="development/environment"
+                        element={
+                          <SuspenseErrorBoundary
+                            level="feature"
+                            loadingFallback={<EnhancedLoadingFallback message="환경 설정 페이지를 로드하는 중..." />}
+                          >
+                            <ReactProfiler id="DevelopmentEnvironment">
+                              <DevelopmentEnvironmentPage />
+                            </ReactProfiler>
+                          </SuspenseErrorBoundary>
+                        }
+                      />
+                      <Route
+                        path="development/deployment"
+                        element={
+                          <SuspenseErrorBoundary
+                            level="feature"
+                            loadingFallback={<EnhancedLoadingFallback message="배포 페이지를 로드하는 중..." />}
+                          >
+                            <ReactProfiler id="DevelopmentDeployment">
+                              <DevelopmentDeploymentPage />
+                            </ReactProfiler>
+                          </SuspenseErrorBoundary>
+                        }
+                      />
 
-            {/* Chatbot Module */}
-            <Route
-              path="chatbot/ai-chat"
-              element={
-                <Suspense fallback={<LoadingSpinner />}>
-                  <ChatbotAIChatPage />
-                </Suspense>
-              }
-            />
-            <Route
-              path="chatbot/custom-bot"
-              element={
-                <Suspense fallback={<LoadingSpinner />}>
-                  <ChatbotCustomBotPage />
-                </Suspense>
-              }
-            />
+                      <Route
+                        path="chatbot/ai-chat"
+                        element={
+                          <SuspenseErrorBoundary
+                            level="feature"
+                            loadingFallback={<EnhancedLoadingFallback message="AI 챗봇 페이지를 로드하는 중..." />}
+                          >
+                            <ReactProfiler id="ChatbotAIChat">
+                              <ChatbotAIChatPage />
+                            </ReactProfiler>
+                          </SuspenseErrorBoundary>
+                        }
+                      />
+                      <Route
+                        path="chatbot/custom-bot"
+                        element={
+                          <SuspenseErrorBoundary
+                            level="feature"
+                            loadingFallback={<EnhancedLoadingFallback message="커스텀 봇 페이지를 로드하는 중..." />}
+                          >
+                            <ReactProfiler id="ChatbotCustomBot">
+                              <ChatbotCustomBotPage />
+                            </ReactProfiler>
+                          </SuspenseErrorBoundary>
+                        }
+                      />
 
-            {/* Image Generation */}
-            <Route
-              path="image-generation"
-              element={
-                <Suspense fallback={<LoadingSpinner />}>
-                  <ImageGenerationPage />
-                </Suspense>
-              }
-            />
-          </Route>
+                      <Route
+                        path="image-generation"
+                        element={
+                          <SuspenseErrorBoundary
+                            level="feature"
+                            loadingFallback={<EnhancedLoadingFallback message="이미지 생성 페이지를 로드하는 중..." />}
+                          >
+                            <ReactProfiler id="ImageGeneration">
+                              <ImageGenerationPage />
+                            </ReactProfiler>
+                          </SuspenseErrorBoundary>
+                        }
+                      />
+                    </Route>
 
-          {/* 404 Not Found */}
-          <Route path="*" element={<NotFoundPage />} />
-        </Routes>
+                    {/* 404 Not Found */}
+                    <Route path="*" element={<NotFoundPage />} />
+                  </Routes>
                 </BrowserRouter>
               </NetworkAwareLoading>
 

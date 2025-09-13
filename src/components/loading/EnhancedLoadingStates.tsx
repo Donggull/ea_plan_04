@@ -3,4 +3,437 @@
  * Suspense와 통합된 로딩 상태 관리
  */
 import { ReactNode, useState, useEffect, useMemo, Suspense } from 'react'
-import { Loader2, RefreshCw, Wifi, WifiOff } from 'lucide-react'\n\n// 로딩 상태 타입\ninterface LoadingState {\n  isLoading: boolean\n  progress?: number\n  message?: string\n  stage?: string\n  estimatedTime?: number\n  error?: boolean\n}\n\n// 로딩 컴포넌트 Props\ninterface LoadingProps {\n  state: LoadingState\n  children?: ReactNode\n  variant?: 'spinner' | 'skeleton' | 'progress' | 'pulse' | 'wave'\n  size?: 'sm' | 'md' | 'lg'\n  fullScreen?: boolean\n  overlay?: boolean\n  showMessage?: boolean\n  showProgress?: boolean\n  className?: string\n}\n\n// 기본 로딩 스피너\nexport function LoadingSpinner({ \n  size = 'md', \n  className = '' \n}: { \n  size?: 'sm' | 'md' | 'lg'\n  className?: string \n}) {\n  const sizeClasses = {\n    sm: 'w-4 h-4',\n    md: 'w-6 h-6',\n    lg: 'w-8 h-8'\n  }\n\n  return (\n    <Loader2 \n      className={`animate-spin linear-accent-blue ${sizeClasses[size]} ${className}`}\n    />\n  )\n}\n\n// 스켈레톤 로딩\nexport function SkeletonLoading({ \n  lines = 3, \n  height = 'h-4', \n  className = '' \n}: { \n  lines?: number\n  height?: string\n  className?: string \n}) {\n  return (\n    <div className={`space-y-3 ${className}`}>\n      {Array.from({ length: lines }).map((_, i) => (\n        <div\n          key={i}\n          className={`${height} bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 dark:from-gray-700 dark:via-gray-600 dark:to-gray-700 rounded animate-pulse`}\n          style={{\n            animationDelay: `${i * 0.1}s`,\n            width: `${100 - i * 10}%`\n          }}\n        />\n      ))}\n    </div>\n  )\n}\n\n// 프로그레스 바\nexport function ProgressBar({ \n  progress = 0, \n  showPercentage = true,\n  message = '',\n  className = '' \n}: { \n  progress?: number\n  showPercentage?: boolean\n  message?: string\n  className?: string \n}) {\n  return (\n    <div className={`w-full ${className}`}>\n      {message && (\n        <p className=\"linear-text-small linear-text-tertiary mb-2\">\n          {message}\n        </p>\n      )}\n      <div className=\"linear-progress-container\">\n        <div className=\"linear-progress-track\">\n          <div \n            className=\"linear-progress-bar transition-all duration-300 ease-out\"\n            style={{ width: `${Math.min(100, Math.max(0, progress))}%` }}\n          />\n        </div>\n        {showPercentage && (\n          <span className=\"linear-text-small linear-text-tertiary ml-3\">\n            {Math.round(progress)}%\n          </span>\n        )}\n      </div>\n    </div>\n  )\n}\n\n// 펄스 효과 로딩\nexport function PulseLoading({ \n  children, \n  className = '' \n}: { \n  children: ReactNode\n  className?: string \n}) {\n  return (\n    <div className={`animate-pulse ${className}`}>\n      {children}\n    </div>\n  )\n}\n\n// 웨이브 효과 로딩\nexport function WaveLoading({ className = '' }: { className?: string }) {\n  return (\n    <div className={`linear-flex-center linear-gap-sm ${className}`}>\n      {[...Array(3)].map((_, i) => (\n        <div\n          key={i}\n          className=\"w-2 h-2 bg-blue-500 rounded-full animate-bounce\"\n          style={{ animationDelay: `${i * 0.1}s` }}\n        />\n      ))}\n    </div>\n  )\n}\n\n// 통합 로딩 컴포넌트\nexport function EnhancedLoading({\n  state,\n  children,\n  variant = 'spinner',\n  size = 'md',\n  fullScreen = false,\n  overlay = false,\n  showMessage = true,\n  showProgress = true,\n  className = ''\n}: LoadingProps) {\n  const [elapsedTime, setElapsedTime] = useState(0)\n\n  useEffect(() => {\n    if (!state.isLoading) return\n\n    const startTime = Date.now()\n    const interval = setInterval(() => {\n      setElapsedTime((Date.now() - startTime) / 1000)\n    }, 100)\n\n    return () => {\n      clearInterval(interval)\n      setElapsedTime(0)\n    }\n  }, [state.isLoading])\n\n  const renderLoadingContent = () => {\n    switch (variant) {\n      case 'skeleton':\n        return <SkeletonLoading className={className} />\n      \n      case 'progress':\n        return (\n          <ProgressBar\n            progress={state.progress || 0}\n            message={state.message}\n            className={className}\n          />\n        )\n      \n      case 'pulse':\n        return (\n          <PulseLoading className={className}>\n            {children || <div className=\"w-full h-32 bg-gray-200 rounded\" />}\n          </PulseLoading>\n        )\n      \n      case 'wave':\n        return <WaveLoading className={className} />\n      \n      default:\n        return (\n          <div className={`linear-loading-content ${className}`}>\n            <LoadingSpinner size={size} />\n            {showMessage && state.message && (\n              <p className=\"linear-text-regular linear-text-tertiary mt-4\">\n                {state.message}\n              </p>\n            )}\n            {state.stage && (\n              <p className=\"linear-text-small linear-text-tertiary mt-2\">\n                단계: {state.stage}\n              </p>\n            )}\n            {showProgress && state.progress !== undefined && (\n              <ProgressBar \n                progress={state.progress} \n                showPercentage \n                className=\"mt-4 w-full max-w-xs\"\n              />\n            )}\n            {state.estimatedTime && elapsedTime < state.estimatedTime && (\n              <p className=\"linear-text-small linear-text-tertiary mt-2\">\n                예상 남은 시간: {Math.max(0, state.estimatedTime - elapsedTime).toFixed(0)}초\n              </p>\n            )}\n          </div>\n        )\n    }\n  }\n\n  if (!state.isLoading) {\n    return <>{children}</>\n  }\n\n  const loadingContent = (\n    <div className={`linear-loading-container ${\n      fullScreen ? 'linear-loading-fullscreen' : ''\n    } ${\n      overlay ? 'linear-loading-overlay' : ''\n    }`}>\n      {renderLoadingContent()}\n    </div>\n  )\n\n  return loadingContent\n}\n\n// 네트워크 상태 인식 로딩\nexport function NetworkAwareLoading({ \n  children, \n  fallback \n}: { \n  children: ReactNode\n  fallback?: ReactNode \n}) {\n  const [isOnline, setIsOnline] = useState(navigator.onLine)\n  const [isSlowConnection, setIsSlowConnection] = useState(false)\n\n  useEffect(() => {\n    const handleOnline = () => setIsOnline(true)\n    const handleOffline = () => setIsOnline(false)\n\n    window.addEventListener('online', handleOnline)\n    window.addEventListener('offline', handleOffline)\n\n    // 연결 속도 감지\n    const connection = (navigator as any).connection\n    if (connection) {\n      const handleConnectionChange = () => {\n        setIsSlowConnection(connection.effectiveType === 'slow-2g' || connection.effectiveType === '2g')\n      }\n      connection.addEventListener('change', handleConnectionChange)\n      handleConnectionChange()\n    }\n\n    return () => {\n      window.removeEventListener('online', handleOnline)\n      window.removeEventListener('offline', handleOffline)\n      if (connection) {\n        connection.removeEventListener('change', () => {})\n      }\n    }\n  }, [])\n\n  if (!isOnline) {\n    return (\n      <div className=\"linear-card linear-error-boundary\">\n        <div className=\"linear-flex-center linear-gap-md mb-4\">\n          <WifiOff className=\"w-6 h-6 linear-accent-red\" />\n          <h3 className=\"linear-title-2\">네트워크 연결 없음</h3>\n        </div>\n        <p className=\"linear-text-regular linear-text-tertiary mb-4\">\n          인터넷 연결을 확인하고 다시 시도해주세요.\n        </p>\n        <button\n          onClick={() => window.location.reload()}\n          className=\"linear-button linear-button-primary linear-flex-center linear-gap-sm\"\n        >\n          <RefreshCw className=\"w-4 h-4\" />\n          다시 시도\n        </button>\n      </div>\n    )\n  }\n\n  if (isSlowConnection) {\n    return (\n      <div className=\"linear-card mb-4\">\n        <div className=\"linear-flex-center linear-gap-md mb-2\">\n          <Wifi className=\"w-5 h-5 linear-accent-orange\" />\n          <span className=\"linear-text-small linear-accent-orange\">\n            느린 네트워크가 감지되었습니다\n          </span>\n        </div>\n        {fallback || (\n          <EnhancedLoading\n            state={{ \n              isLoading: true, \n              message: '느린 연결로 인해 로딩이 지연될 수 있습니다...' \n            }}\n            variant=\"wave\"\n          />\n        )}\n        {children}\n      </div>\n    )\n  }\n\n  return <>{children}</>\n}\n\n// 단계적 로딩 관리자\nexport class LoadingStageManager {\n  private stages: string[] = []\n  private currentStageIndex = 0\n  private listeners: Array<(state: LoadingState) => void> = []\n\n  constructor(stages: string[]) {\n    this.stages = stages\n  }\n\n  subscribe(listener: (state: LoadingState) => void) {\n    this.listeners.push(listener)\n    return () => {\n      this.listeners = this.listeners.filter(l => l !== listener)\n    }\n  }\n\n  nextStage() {\n    if (this.currentStageIndex < this.stages.length - 1) {\n      this.currentStageIndex++\n      this.notifyListeners()\n    }\n  }\n\n  setProgress(progress: number) {\n    this.notifyListeners(progress)\n  }\n\n  complete() {\n    this.notifyListeners(100, false)\n  }\n\n  private notifyListeners(progress?: number, isLoading = true) {\n    const state: LoadingState = {\n      isLoading,\n      stage: this.stages[this.currentStageIndex],\n      progress: progress !== undefined ? progress : \n        (this.currentStageIndex / (this.stages.length - 1)) * 100,\n      message: `${this.stages[this.currentStageIndex]}...`\n    }\n\n    this.listeners.forEach(listener => listener(state))\n  }\n\n  reset() {\n    this.currentStageIndex = 0\n    this.notifyListeners(0)\n  }\n}\n\n// Suspense 통합 래퍼\nexport function SuspenseLoading({ \n  children, \n  fallback, \n  variant = 'spinner' \n}: { \n  children: ReactNode\n  fallback?: ReactNode\n  variant?: 'spinner' | 'skeleton' | 'wave'\n}) {\n  const defaultFallback = (\n    <EnhancedLoading\n      state={{ isLoading: true, message: '컨텐츠를 불러오는 중...' }}\n      variant={variant}\n    />\n  )\n\n  return (\n    <Suspense fallback={fallback || defaultFallback}>\n      {children}\n    </Suspense>\n  )\n}\n\n// 로딩 상태 훅\nexport function useLoadingState(initialLoading = false) {\n  const [state, setState] = useState<LoadingState>({\n    isLoading: initialLoading\n  })\n\n  const setLoading = (isLoading: boolean, options?: Partial<LoadingState>) => {\n    setState(prev => ({\n      ...prev,\n      isLoading,\n      ...options\n    }))\n  }\n\n  const setProgress = (progress: number, message?: string) => {\n    setState(prev => ({\n      ...prev,\n      progress,\n      message: message || prev.message\n    }))\n  }\n\n  const setStage = (stage: string, message?: string) => {\n    setState(prev => ({\n      ...prev,\n      stage,\n      message: message || prev.message\n    }))\n  }\n\n  return {\n    state,\n    setLoading,\n    setProgress,\n    setStage,\n    reset: () => setState({ isLoading: false })\n  }\n}"
+import { Loader2, RefreshCw, Wifi, WifiOff } from 'lucide-react'
+
+// 로딩 상태 타입
+interface LoadingState {
+  isLoading: boolean
+  progress?: number
+  message?: string
+  stage?: string
+  estimatedTime?: number
+  error?: boolean
+}
+
+// 로딩 컴포넌트 Props
+interface LoadingProps {
+  state: LoadingState
+  children?: ReactNode
+  variant?: 'spinner' | 'skeleton' | 'progress' | 'pulse' | 'wave'
+  size?: 'sm' | 'md' | 'lg'
+  fullScreen?: boolean
+  overlay?: boolean
+  showMessage?: boolean
+  showProgress?: boolean
+  className?: string
+}
+
+// 기본 로딩 스피너
+export function LoadingSpinner({
+  size = 'md',
+  className = ''
+}: {
+  size?: 'sm' | 'md' | 'lg'
+  className?: string
+}) {
+  const sizeClasses = {
+    sm: 'w-4 h-4',
+    md: 'w-6 h-6',
+    lg: 'w-8 h-8'
+  }
+
+  return (
+    <Loader2
+      className={`animate-spin linear-accent-blue ${sizeClasses[size]} ${className}`}
+    />
+  )
+}
+
+// 스켈레톤 로딩
+export function SkeletonLoading({
+  lines = 3,
+  height = 'h-4',
+  className = ''
+}: {
+  lines?: number
+  height?: string
+  className?: string
+}) {
+  return (
+    <div className={`space-y-3 ${className}`}>
+      {Array.from({ length: lines }).map((_, i) => (
+        <div
+          key={i}
+          className={`${height} bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 dark:from-gray-700 dark:via-gray-600 dark:to-gray-700 rounded animate-pulse`}
+          style={{
+            animationDelay: `${i * 0.1}s`,
+            width: `${100 - i * 10}%`
+          }}
+        />
+      ))}
+    </div>
+  )
+}
+
+// 프로그레스 바
+export function ProgressBar({
+  progress = 0,
+  showPercentage = true,
+  message = '',
+  className = ''
+}: {
+  progress?: number
+  showPercentage?: boolean
+  message?: string
+  className?: string
+}) {
+  return (
+    <div className={`w-full ${className}`}>
+      {message && (
+        <p className="linear-text-small linear-text-tertiary mb-2">
+          {message}
+        </p>
+      )}
+      <div className="linear-progress-container">
+        <div className="linear-progress-track">
+          <div
+            className="linear-progress-bar transition-all duration-300 ease-out"
+            style={{ width: `${Math.min(100, Math.max(0, progress))}%` }}
+          />
+        </div>
+        {showPercentage && (
+          <span className="linear-text-small linear-text-tertiary ml-3">
+            {Math.round(progress)}%
+          </span>
+        )}
+      </div>
+    </div>
+  )
+}
+
+// 펄스 효과 로딩
+export function PulseLoading({
+  children,
+  className = ''
+}: {
+  children: ReactNode
+  className?: string
+}) {
+  return (
+    <div className={`animate-pulse ${className}`}>
+      {children}
+    </div>
+  )
+}
+
+// 웨이브 효과 로딩
+export function WaveLoading({ className = '' }: { className?: string }) {
+  return (
+    <div className={`linear-flex-center linear-gap-sm ${className}`}>
+      {[...Array(3)].map((_, i) => (
+        <div
+          key={i}
+          className="w-2 h-2 bg-blue-500 rounded-full animate-bounce"
+          style={{ animationDelay: `${i * 0.1}s` }}
+        />
+      ))}
+    </div>
+  )
+}
+
+// 통합 로딩 컴포넌트
+export function EnhancedLoading({
+  state,
+  children,
+  variant = 'spinner',
+  size = 'md',
+  fullScreen = false,
+  overlay = false,
+  showMessage = true,
+  showProgress = true,
+  className = ''
+}: LoadingProps) {
+  const [elapsedTime, setElapsedTime] = useState(0)
+
+  useEffect(() => {
+    if (!state.isLoading) return
+
+    const startTime = Date.now()
+    const interval = setInterval(() => {
+      setElapsedTime((Date.now() - startTime) / 1000)
+    }, 100)
+
+    return () => {
+      clearInterval(interval)
+      setElapsedTime(0)
+    }
+  }, [state.isLoading])
+
+  const renderLoadingContent = () => {
+    switch (variant) {
+      case 'skeleton':
+        return <SkeletonLoading className={className} />
+
+      case 'progress':
+        return (
+          <ProgressBar
+            progress={state.progress || 0}
+            message={state.message}
+            className={className}
+          />
+        )
+
+      case 'pulse':
+        return (
+          <PulseLoading className={className}>
+            {children || <div className="w-full h-32 bg-gray-200 rounded" />}
+          </PulseLoading>
+        )
+
+      case 'wave':
+        return <WaveLoading className={className} />
+
+      default:
+        return (
+          <div className={`linear-loading-content ${className}`}>
+            <LoadingSpinner size={size} />
+            {showMessage && state.message && (
+              <p className="linear-text-regular linear-text-tertiary mt-4">
+                {state.message}
+              </p>
+            )}
+            {state.stage && (
+              <p className="linear-text-small linear-text-tertiary mt-2">
+                단계: {state.stage}
+              </p>
+            )}
+            {showProgress && state.progress !== undefined && (
+              <ProgressBar
+                progress={state.progress}
+                showPercentage
+                className="mt-4 w-full max-w-xs"
+              />
+            )}
+            {state.estimatedTime && elapsedTime < state.estimatedTime && (
+              <p className="linear-text-small linear-text-tertiary mt-2">
+                예상 남은 시간: {Math.max(0, state.estimatedTime - elapsedTime).toFixed(0)}초
+              </p>
+            )}
+          </div>
+        )
+    }
+  }
+
+  if (!state.isLoading) {
+    return <>{children}</>
+  }
+
+  const loadingContent = (
+    <div className={`linear-loading-container ${
+      fullScreen ? 'linear-loading-fullscreen' : ''
+    } ${
+      overlay ? 'linear-loading-overlay' : ''
+    }`}>
+      {renderLoadingContent()}
+    </div>
+  )
+
+  return loadingContent
+}
+
+// 네트워크 상태 인식 로딩
+export function NetworkAwareLoading({
+  children,
+  fallback
+}: {
+  children: ReactNode
+  fallback?: ReactNode
+}) {
+  const [isOnline, setIsOnline] = useState(navigator.onLine)
+  const [isSlowConnection, setIsSlowConnection] = useState(false)
+
+  useEffect(() => {
+    const handleOnline = () => setIsOnline(true)
+    const handleOffline = () => setIsOnline(false)
+
+    window.addEventListener('online', handleOnline)
+    window.addEventListener('offline', handleOffline)
+
+    // 연결 속도 감지
+    const connection = (navigator as any).connection
+    if (connection) {
+      const handleConnectionChange = () => {
+        setIsSlowConnection(connection.effectiveType === 'slow-2g' || connection.effectiveType === '2g')
+      }
+      connection.addEventListener('change', handleConnectionChange)
+      handleConnectionChange()
+    }
+
+    return () => {
+      window.removeEventListener('online', handleOnline)
+      window.removeEventListener('offline', handleOffline)
+      if (connection) {
+        connection.removeEventListener('change', () => {})
+      }
+    }
+  }, [])
+
+  if (!isOnline) {
+    return (
+      <div className="linear-card linear-error-boundary">
+        <div className="linear-flex-center linear-gap-md mb-4">
+          <WifiOff className="w-6 h-6 linear-accent-red" />
+          <h3 className="linear-title-2">네트워크 연결 없음</h3>
+        </div>
+        <p className="linear-text-regular linear-text-tertiary mb-4">
+          인터넷 연결을 확인하고 다시 시도해주세요.
+        </p>
+        <button
+          onClick={() => window.location.reload()}
+          className="linear-button linear-button-primary linear-flex-center linear-gap-sm"
+        >
+          <RefreshCw className="w-4 h-4" />
+          다시 시도
+        </button>
+      </div>
+    )
+  }
+
+  if (isSlowConnection) {
+    return (
+      <div className="linear-card mb-4">
+        <div className="linear-flex-center linear-gap-md mb-2">
+          <Wifi className="w-5 h-5 linear-accent-orange" />
+          <span className="linear-text-small linear-accent-orange">
+            느린 네트워크가 감지되었습니다
+          </span>
+        </div>
+        {fallback || (
+          <EnhancedLoading
+            state={{
+              isLoading: true,
+              message: '느린 연결로 인해 로딩이 지연될 수 있습니다...'
+            }}
+            variant="wave"
+          />
+        )}
+        {children}
+      </div>
+    )
+  }
+
+  return <>{children}</>
+}
+
+// 단계적 로딩 관리자
+export class LoadingStageManager {
+  private stages: string[] = []
+  private currentStageIndex = 0
+  private listeners: Array<(state: LoadingState) => void> = []
+
+  constructor(stages: string[]) {
+    this.stages = stages
+  }
+
+  subscribe(listener: (state: LoadingState) => void) {
+    this.listeners.push(listener)
+    return () => {
+      this.listeners = this.listeners.filter(l => l !== listener)
+    }
+  }
+
+  nextStage() {
+    if (this.currentStageIndex < this.stages.length - 1) {
+      this.currentStageIndex++
+      this.notifyListeners()
+    }
+  }
+
+  setProgress(progress: number) {
+    this.notifyListeners(progress)
+  }
+
+  complete() {
+    this.notifyListeners(100, false)
+  }
+
+  private notifyListeners(progress?: number, isLoading = true) {
+    const state: LoadingState = {
+      isLoading,
+      stage: this.stages[this.currentStageIndex],
+      progress: progress !== undefined ? progress :
+        (this.currentStageIndex / (this.stages.length - 1)) * 100,
+      message: `${this.stages[this.currentStageIndex]}...`
+    }
+
+    this.listeners.forEach(listener => listener(state))
+  }
+
+  reset() {
+    this.currentStageIndex = 0
+    this.notifyListeners(0)
+  }
+}
+
+// Suspense 통합 래퍼
+export function SuspenseLoading({
+  children,
+  fallback,
+  variant = 'spinner'
+}: {
+  children: ReactNode
+  fallback?: ReactNode
+  variant?: 'spinner' | 'skeleton' | 'wave'
+}) {
+  const defaultFallback = (
+    <EnhancedLoading
+      state={{ isLoading: true, message: '컨텐츠를 불러오는 중...' }}
+      variant={variant}
+    />
+  )
+
+  return (
+    <Suspense fallback={fallback || defaultFallback}>
+      {children}
+    </Suspense>
+  )
+}
+
+// 로딩 상태 훅
+export function useLoadingState(initialLoading = false) {
+  const [state, setState] = useState<LoadingState>({
+    isLoading: initialLoading
+  })
+
+  const setLoading = (isLoading: boolean, options?: Partial<LoadingState>) => {
+    setState(prev => ({
+      ...prev,
+      isLoading,
+      ...options
+    }))
+  }
+
+  const setProgress = (progress: number, message?: string) => {
+    setState(prev => ({
+      ...prev,
+      progress,
+      message: message || prev.message
+    }))
+  }
+
+  const setStage = (stage: string, message?: string) => {
+    setState(prev => ({
+      ...prev,
+      stage,
+      message: message || prev.message
+    }))
+  }
+
+  return {
+    state,
+    setLoading,
+    setProgress,
+    setStage,
+    reset: () => setState({ isLoading: false })
+  }
+}
