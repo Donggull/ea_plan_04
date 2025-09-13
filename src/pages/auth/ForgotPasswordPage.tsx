@@ -1,49 +1,43 @@
 import { useState } from 'react'
-import { Navigate, useLocation, Link } from 'react-router-dom'
-import { useAuth } from '@/hooks/useAuth'
-import { Eye, EyeOff, AlertCircle } from 'lucide-react'
+import { Link } from 'react-router-dom'
+import { AlertCircle, CheckCircle, ArrowLeft } from 'lucide-react'
+import { supabase } from '@/lib/supabase/client'
 
-export function LoginPage() {
-  const { signIn, user, loading } = useAuth()
-  const location = useLocation()
-
+export function ForgotPasswordPage() {
   const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState('')
+  const [success, setSuccess] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
-
-  // 이미 로그인된 경우 대시보드로 리다이렉트
-  if (user) {
-    const from = location.state?.from?.pathname || '/dashboard'
-    return <Navigate to={from} replace />
-  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
-    if (!email || !password) {
-      setError('이메일과 비밀번호를 모두 입력해주세요.')
+    if (!email) {
+      setError('이메일을 입력해주세요.')
       return
     }
 
     setIsSubmitting(true)
     setError('')
+    setSuccess('')
 
     try {
-      const { error: authError } = await signIn(email, password)
+      const { error: resetError } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/reset-password`
+      })
 
-      if (authError) {
-        if (authError.message.includes('Invalid login credentials')) {
-          setError('이메일 또는 비밀번호가 올바르지 않습니다.')
-        } else if (authError.message.includes('Email not confirmed')) {
-          setError('이메일 인증이 필요합니다. 이메일을 확인해주세요.')
+      if (resetError) {
+        if (resetError.message.includes('Invalid email')) {
+          setError('올바른 이메일 형식이 아닙니다.')
         } else {
-          setError('로그인 중 오류가 발생했습니다. 다시 시도해주세요.')
+          setError('비밀번호 재설정 링크 전송 중 오류가 발생했습니다.')
         }
+      } else {
+        setSuccess('비밀번호 재설정 링크가 이메일로 전송되었습니다. 이메일을 확인해주세요.')
+        setEmail('')
       }
     } catch (error) {
-      console.error('로그인 오류:', error)
+      console.error('비밀번호 재설정 오류:', error)
       setError('예상치 못한 오류가 발생했습니다.')
     } finally {
       setIsSubmitting(false)
@@ -65,6 +59,41 @@ export function LoginPage() {
           maxWidth: '420px'
         }}
       >
+        {/* Back to Login */}
+        <div
+          style={{
+            marginBottom: 'var(--linear-spacing-lg)'
+          }}
+        >
+          <Link
+            to="/login"
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              color: 'var(--linear-text-tertiary)',
+              textDecoration: 'none',
+              fontSize: 'var(--linear-text-sm)',
+              fontWeight: '510',
+              transition: 'color var(--linear-animation-fast) var(--linear-ease-out)'
+            }}
+            onMouseEnter={(e) => {
+              (e.target as HTMLElement).style.color = 'var(--linear-text-secondary)'
+            }}
+            onMouseLeave={(e) => {
+              (e.target as HTMLElement).style.color = 'var(--linear-text-tertiary)'
+            }}
+          >
+            <ArrowLeft
+              style={{
+                width: '16px',
+                height: '16px',
+                marginRight: 'var(--linear-spacing-xs)'
+              }}
+            />
+            로그인으로 돌아가기
+          </Link>
+        </div>
+
         {/* Header */}
         <div
           className="text-center"
@@ -103,7 +132,7 @@ export function LoginPage() {
               marginBottom: 'var(--linear-spacing-sm)'
             }}
           >
-            Eluo Platform
+            비밀번호 재설정
           </h1>
 
           <p
@@ -113,11 +142,11 @@ export function LoginPage() {
               textAlign: 'center'
             }}
           >
-            AI 통합 프로젝트 관리 플랫폼에 오신 것을 환영합니다
+            가입한 이메일 주소를 입력하시면 비밀번호 재설정 링크를 보내드립니다.
           </p>
         </div>
 
-        {/* Login Form */}
+        {/* Form */}
         <div className="linear-card">
           {error && (
             <div
@@ -144,6 +173,51 @@ export function LoginPage() {
               >
                 {error}
               </span>
+            </div>
+          )}
+
+          {success && (
+            <div
+              className="flex items-start"
+              style={{
+                background: 'rgba(34, 197, 94, 0.1)',
+                border: '1px solid var(--linear-accent-green)',
+                borderRadius: 'var(--linear-radius-md)',
+                padding: 'var(--linear-spacing-md)',
+                marginBottom: 'var(--linear-spacing-lg)'
+              }}
+            >
+              <CheckCircle
+                style={{
+                  color: 'var(--linear-accent-green)',
+                  width: '20px',
+                  height: '20px',
+                  marginRight: 'var(--linear-spacing-xs)',
+                  marginTop: '2px',
+                  flexShrink: 0
+                }}
+              />
+              <div>
+                <span
+                  className="linear-text-regular"
+                  style={{
+                    color: 'var(--linear-accent-green)',
+                    display: 'block',
+                    marginBottom: 'var(--linear-spacing-xs)'
+                  }}
+                >
+                  {success}
+                </span>
+                <span
+                  className="linear-text-small"
+                  style={{
+                    color: 'var(--linear-text-tertiary)',
+                    display: 'block'
+                  }}
+                >
+                  스팸 폴더도 확인해보세요. 이메일이 오지 않으면 다시 시도해주세요.
+                </span>
+              </div>
             </div>
           )}
 
@@ -175,79 +249,24 @@ export function LoginPage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className="linear-input"
-                placeholder="이메일을 입력하세요"
+                placeholder="가입한 이메일을 입력하세요"
                 required
                 disabled={isSubmitting}
               />
             </div>
 
-            {/* Password Field */}
-            <div>
-              <label
-                htmlFor="password"
-                className="linear-text-regular"
-                style={{
-                  display: 'block',
-                  color: 'var(--linear-text-secondary)',
-                  fontWeight: '510',
-                  marginBottom: 'var(--linear-spacing-sm)'
-                }}
-              >
-                비밀번호
-              </label>
-              <div style={{ position: 'relative' }}>
-                <input
-                  id="password"
-                  type={showPassword ? 'text' : 'password'}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="linear-input"
-                  style={{
-                    paddingRight: '48px'
-                  }}
-                  placeholder="비밀번호를 입력하세요"
-                  required
-                  disabled={isSubmitting}
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  disabled={isSubmitting}
-                  style={{
-                    position: 'absolute',
-                    right: 'var(--linear-spacing-xs)',
-                    top: '50%',
-                    transform: 'translateY(-50%)',
-                    background: 'transparent',
-                    border: 'none',
-                    color: 'var(--linear-text-tertiary)',
-                    cursor: isSubmitting ? 'not-allowed' : 'pointer',
-                    padding: 'var(--linear-spacing-sm)',
-                    borderRadius: 'var(--linear-radius-sm)',
-                    transition: 'color var(--linear-animation-fast) var(--linear-ease-out)'
-                  }}
-                >
-                  {showPassword ? (
-                    <EyeOff style={{ width: '20px', height: '20px' }} />
-                  ) : (
-                    <Eye style={{ width: '20px', height: '20px' }} />
-                  )}
-                </button>
-              </div>
-            </div>
-
             {/* Submit Button */}
             <button
               type="submit"
-              disabled={isSubmitting || loading}
+              disabled={isSubmitting}
               className="linear-button-primary"
               style={{
-                opacity: isSubmitting || loading ? 0.6 : 1,
-                cursor: isSubmitting || loading ? 'not-allowed' : 'pointer',
+                opacity: isSubmitting ? 0.6 : 1,
+                cursor: isSubmitting ? 'not-allowed' : 'pointer',
                 width: '100%'
               }}
             >
-              {isSubmitting || loading ? (
+              {isSubmitting ? (
                 <div
                   style={{
                     display: 'flex',
@@ -267,15 +286,15 @@ export function LoginPage() {
                       animation: 'spin 1s linear infinite'
                     }}
                   ></div>
-                  로그인 중...
+                  전송 중...
                 </div>
               ) : (
-                '로그인'
+                '재설정 링크 전송'
               )}
             </button>
           </form>
 
-          {/* Additional Info */}
+          {/* Help Text */}
           <div
             style={{
               textAlign: 'center',
@@ -289,14 +308,13 @@ export function LoginPage() {
                 marginBottom: 'var(--linear-spacing-sm)'
               }}
             >
+              계정이 기억나셨나요?{' '}
               <Link
-                to="/forgot-password"
+                to="/login"
                 style={{
                   color: 'var(--linear-accent-blue)',
                   fontWeight: '510',
                   textDecoration: 'none',
-                  fontFamily: 'var(--linear-font-primary)',
-                  fontSize: 'inherit',
                   transition: 'all var(--linear-animation-fast) var(--linear-ease-out)'
                 }}
                 onMouseEnter={(e) => {
@@ -306,7 +324,7 @@ export function LoginPage() {
                   (e.target as HTMLElement).style.textDecoration = 'none'
                 }}
               >
-                비밀번호를 잊으셨나요?
+                로그인
               </Link>
             </p>
             <p
@@ -315,15 +333,13 @@ export function LoginPage() {
                 color: 'var(--linear-text-muted)'
               }}
             >
-              아직 계정이 없으신가요?{' '}
+              계정이 없으신가요?{' '}
               <Link
                 to="/signup"
                 style={{
                   color: 'var(--linear-accent-blue)',
                   fontWeight: '510',
                   textDecoration: 'none',
-                  fontFamily: 'var(--linear-font-primary)',
-                  fontSize: 'inherit',
                   transition: 'all var(--linear-animation-fast) var(--linear-ease-out)'
                 }}
                 onMouseEnter={(e) => {

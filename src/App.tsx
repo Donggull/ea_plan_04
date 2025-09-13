@@ -21,6 +21,7 @@ import { ProtectedRoute } from '@/components/auth/ProtectedRoute'
 
 // Auth Pages
 import { LoginPage } from '@/pages/LoginPage'
+import { SignupPage, ForgotPasswordPage, ResetPasswordPage, VerifyEmailPage } from '@/pages/auth'
 import { NotFoundPage } from '@/pages/NotFoundPage'
 
 // Dashboard
@@ -80,6 +81,10 @@ function App() {
                   <Routes>
                     {/* Public Routes */}
                     <Route path="/login" element={<LoginPage />} />
+                    <Route path="/signup" element={<SignupPage />} />
+                    <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+                    <Route path="/reset-password" element={<ResetPasswordPage />} />
+                    <Route path="/verify-email" element={<VerifyEmailPage />} />
 
                     {/* Protected Routes */}
                     <Route
