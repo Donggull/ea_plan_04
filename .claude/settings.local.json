@@ -37,7 +37,11 @@
       "Bash(start nodejs-installer.msi)",
       "Bash(git add:*)",
       "Bash(git commit:*)",
-      "Bash(npm run type-check:*)"
+      "Bash(npm run type-check:*)",
+      "mcp__playwright-stealth__playwright_evaluate",
+      "mcp__playwright-stealth__playwright_fill",
+      "mcp__playwright-stealth__playwright_click",
+      "mcp__github-mcp__git-diff"
     ],
     "deny": [],
     "ask": []

@@ -3,6 +3,7 @@ import type { User, Session, AuthError } from '@supabase/supabase-js'
 import { auth, supabase } from '@/lib/supabase/client'
 import { profileSync } from '@/lib/auth/profileSync'
 import type { Database } from '@/types/supabase'
+import { SessionManager } from '@/components/auth/SessionManager'
 
 type UserProfile = Database['public']['Tables']['profiles']['Row']
 
@@ -129,24 +130,82 @@ export function AuthProvider({ children }: AuthProviderProps) {
       }
     )
 
-    // 브라우저 창/탭 종료 시 세션 종료 처리
-    const handleBeforeUnload = () => {
-      // 다른 탭이 열려있지 않은 경우에만 세션 종료
-      if (window.name === 'main-window') {
-        auth.signOut()
+    // 세션 지속성을 위한 설정
+    // Supabase는 이미 localStorage를 통해 세션을 자동으로 저장하고 복구함
+
+    // 브라우저 종료 vs 새로고침/탭 전환 구분을 위한 로직
+    let isRefreshing = false
+    let tabId = sessionStorage.getItem('eluo-tab-id')
+
+    // 탭 고유 ID 생성 (브라우저 완전 종료 감지용)
+    if (!tabId) {
+      tabId = Date.now().toString() + '-' + Math.random().toString(36).substr(2, 9)
+      sessionStorage.setItem('eluo-tab-id', tabId)
+    }
+
+    // beforeunload 이벤트 - 새로고침 감지
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      // 새로고침이나 탭 닫기 구분
+      isRefreshing = true
+
+      // 짧은 지연 후 새로고침 플래그 초기화
+      setTimeout(() => {
+        isRefreshing = false
+      }, 100)
+    }
+
+    // 페이지 로드 시 세션 복구 확인
+    const handlePageLoad = () => {
+      // 페이지 로드 시 활동 시간 기록
+      sessionStorage.setItem('eluo-last-activity', Date.now().toString())
+
+      // 이전 세션이 있었는지 확인
+      const wasLoggedIn = localStorage.getItem('eluo-auth-token')
+      if (wasLoggedIn && !user && !loading) {
+        // Supabase가 자동으로 세션을 복구하도록 함
+        console.log('세션 복구 중...')
       }
     }
 
-    // 페이지 로드 시 메인 윈도우로 표시
-    if (!window.name) {
-      window.name = 'main-window'
+    // 페이지 언로드 시 처리 (브라우저 완전 종료만)
+    const handleUnload = () => {
+      if (!isRefreshing) {
+        // 실제 브라우저 종료 시에만 실행
+        // 하지만 이 이벤트는 신뢰성이 떨어지므로 다른 방법을 사용
+      }
     }
 
+    // 페이지 가시성 변경 감지
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        // 탭이 다시 보일 때 세션 유효성 확인
+        sessionStorage.setItem('eluo-last-activity', Date.now().toString())
+      }
+    }
+
+    // 브라우저 완전 종료 감지를 위한 heartbeat 시스템
+    const startHeartbeat = () => {
+      setInterval(() => {
+        if (user && !document.hidden) {
+          sessionStorage.setItem('eluo-last-activity', Date.now().toString())
+        }
+      }, 30000) // 30초마다 업데이트
+    }
+
+    // 초기 설정
+    handlePageLoad()
+    startHeartbeat()
+
+    // 이벤트 리스너 등록
     window.addEventListener('beforeunload', handleBeforeUnload)
+    window.addEventListener('unload', handleUnload)
+    document.addEventListener('visibilitychange', handleVisibilityChange)
 
     return () => {
       subscription?.unsubscribe()
       window.removeEventListener('beforeunload', handleBeforeUnload)
+      window.removeEventListener('unload', handleUnload)
+      document.removeEventListener('visibilitychange', handleVisibilityChange)
     }
   }, [])
 
@@ -279,6 +338,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   return (
     <AuthContext.Provider value={value}>
+      <SessionManager />
       {children}
     </AuthContext.Provider>
   )

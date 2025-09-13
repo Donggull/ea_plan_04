@@ -17,6 +17,7 @@ export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey, {
     storage: window.localStorage,
     autoRefreshToken: true,
     detectSessionInUrl: true,
+    flowType: 'pkce', // PKCE 플로우 사용으로 보안 강화
   },
   realtime: {
     params: {
@@ -26,6 +27,7 @@ export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey, {
   global: {
     headers: {
       'x-application-name': 'Eluo Platform',
+      'x-client-info': 'eluo-web@1.0.0',
     },
   },
 })
