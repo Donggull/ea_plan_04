@@ -55,25 +55,38 @@ export function LoginPage() {
       className="min-h-screen flex items-center justify-center"
       style={{
         background: 'var(--linear-bg-primary)',
-        fontFamily: 'var(--linear-font-primary)'
+        fontFamily: 'var(--linear-font-primary)',
+        padding: 'var(--linear-spacing-lg)'
       }}
     >
-      <div className="w-full max-w-md">
+      <div
+        className="linear-container w-full"
+        style={{
+          maxWidth: '420px'
+        }}
+      >
         {/* Header */}
-        <div className="text-center mb-8">
+        <div
+          className="text-center"
+          style={{
+            marginBottom: 'var(--linear-spacing-xl)'
+          }}
+        >
           <div
-            className="flex items-center justify-center mb-6"
+            className="flex items-center justify-center"
             style={{
-              width: '48px',
-              height: '48px',
+              width: '56px',
+              height: '56px',
               background: 'linear-gradient(135deg, var(--linear-accent-blue), var(--linear-accent-indigo))',
-              borderRadius: 'var(--linear-radius-lg)',
-              margin: '0 auto'
+              borderRadius: 'var(--linear-radius-xl)',
+              margin: '0 auto',
+              marginBottom: 'var(--linear-spacing-lg)'
             }}
           >
             <span
-              className="text-2xl font-bold text-white"
+              className="linear-title-3"
               style={{
+                color: 'white',
                 fontFamily: 'var(--linear-font-primary)',
                 fontWeight: '680'
               }}
@@ -83,10 +96,11 @@ export function LoginPage() {
           </div>
 
           <h1
-            className="linear-title-4 mb-2"
+            className="linear-title-4"
             style={{
               color: 'var(--linear-text-primary)',
-              textAlign: 'center'
+              textAlign: 'center',
+              marginBottom: 'var(--linear-spacing-sm)'
             }}
           >
             ELUO Platform
@@ -104,27 +118,25 @@ export function LoginPage() {
         </div>
 
         {/* Login Form */}
-        <div
-          className="linear-card"
-          style={{
-            background: 'var(--linear-bg-secondary)',
-            border: '1px solid var(--linear-border-primary)',
-            borderRadius: 'var(--linear-radius-lg)',
-            padding: 'var(--linear-spacing-xl)'
-          }}
-        >
+        <div className="linear-card">
           {error && (
             <div
-              className="flex items-center p-4 mb-6 rounded-lg"
+              className="flex items-center"
               style={{
                 background: 'rgba(235, 87, 87, 0.1)',
                 border: '1px solid var(--linear-accent-red)',
-                borderRadius: 'var(--linear-radius-md)'
+                borderRadius: 'var(--linear-radius-md)',
+                padding: 'var(--linear-spacing-md)',
+                marginBottom: 'var(--linear-spacing-lg)'
               }}
             >
               <AlertCircle
-                className="w-5 h-5 mr-3"
-                style={{ color: 'var(--linear-accent-red)' }}
+                style={{
+                  color: 'var(--linear-accent-red)',
+                  width: '20px',
+                  height: '20px',
+                  marginRight: 'var(--linear-spacing-xs)'
+                }}
               />
               <span
                 className="linear-text-regular"
@@ -135,15 +147,24 @@ export function LoginPage() {
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form
+            onSubmit={handleSubmit}
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 'var(--linear-spacing-lg)'
+            }}
+          >
             {/* Email Field */}
             <div>
               <label
                 htmlFor="email"
-                className="block linear-text-regular mb-2"
+                className="linear-text-regular"
                 style={{
+                  display: 'block',
                   color: 'var(--linear-text-secondary)',
-                  fontWeight: '510'
+                  fontWeight: '510',
+                  marginBottom: 'var(--linear-spacing-sm)'
                 }}
               >
                 이메일
@@ -164,21 +185,26 @@ export function LoginPage() {
             <div>
               <label
                 htmlFor="password"
-                className="block linear-text-regular mb-2"
+                className="linear-text-regular"
                 style={{
+                  display: 'block',
                   color: 'var(--linear-text-secondary)',
-                  fontWeight: '510'
+                  fontWeight: '510',
+                  marginBottom: 'var(--linear-spacing-sm)'
                 }}
               >
                 비밀번호
               </label>
-              <div className="relative">
+              <div style={{ position: 'relative' }}>
                 <input
                   id="password"
                   type={showPassword ? 'text' : 'password'}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="linear-input pr-12"
+                  className="linear-input"
+                  style={{
+                    paddingRight: '48px'
+                  }}
                   placeholder="비밀번호를 입력하세요"
                   required
                   disabled={isSubmitting}
@@ -186,16 +212,25 @@ export function LoginPage() {
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
                   disabled={isSubmitting}
                   style={{
-                    color: 'var(--linear-text-tertiary)'
+                    position: 'absolute',
+                    right: 'var(--linear-spacing-xs)',
+                    top: '50%',
+                    transform: 'translateY(-50%)',
+                    background: 'transparent',
+                    border: 'none',
+                    color: 'var(--linear-text-tertiary)',
+                    cursor: isSubmitting ? 'not-allowed' : 'pointer',
+                    padding: 'var(--linear-spacing-sm)',
+                    borderRadius: 'var(--linear-radius-sm)',
+                    transition: 'color var(--linear-animation-fast) var(--linear-ease-out)'
                   }}
                 >
                   {showPassword ? (
-                    <EyeOff className="w-5 h-5" />
+                    <EyeOff style={{ width: '20px', height: '20px' }} />
                   ) : (
-                    <Eye className="w-5 h-5" />
+                    <Eye style={{ width: '20px', height: '20px' }} />
                   )}
                 </button>
               </div>
@@ -205,19 +240,31 @@ export function LoginPage() {
             <button
               type="submit"
               disabled={isSubmitting || loading}
-              className="linear-button-primary w-full"
+              className="linear-button-primary"
               style={{
                 opacity: isSubmitting || loading ? 0.6 : 1,
-                cursor: isSubmitting || loading ? 'not-allowed' : 'pointer'
+                cursor: isSubmitting || loading ? 'not-allowed' : 'pointer',
+                width: '100%'
               }}
             >
               {isSubmitting || loading ? (
-                <div className="flex items-center justify-center">
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: 'var(--linear-spacing-sm)'
+                  }}
+                >
                   <div
-                    className="animate-spin rounded-full h-4 w-4 border-2 border-transparent mr-2"
                     style={{
-                      borderTopColor: 'white',
-                      borderRightColor: 'white'
+                      width: '16px',
+                      height: '16px',
+                      border: '2px solid transparent',
+                      borderTop: '2px solid white',
+                      borderRight: '2px solid white',
+                      borderRadius: '50%',
+                      animation: 'spin 1s linear infinite'
                     }}
                   ></div>
                   로그인 중...
@@ -229,7 +276,12 @@ export function LoginPage() {
           </form>
 
           {/* Additional Info */}
-          <div className="mt-6 text-center">
+          <div
+            style={{
+              textAlign: 'center',
+              marginTop: 'var(--linear-spacing-lg)'
+            }}
+          >
             <p
               className="linear-text-small"
               style={{
@@ -238,10 +290,22 @@ export function LoginPage() {
             >
               아직 계정이 없으신가요?{' '}
               <button
-                className="font-medium hover:underline"
                 style={{
+                  background: 'transparent',
+                  border: 'none',
                   color: 'var(--linear-accent-blue)',
-                  fontWeight: '510'
+                  fontWeight: '510',
+                  cursor: 'pointer',
+                  textDecoration: 'none',
+                  fontFamily: 'var(--linear-font-primary)',
+                  fontSize: 'inherit',
+                  transition: 'all var(--linear-animation-fast) var(--linear-ease-out)'
+                }}
+                onMouseEnter={(e) => {
+                  (e.target as HTMLElement).style.textDecoration = 'underline'
+                }}
+                onMouseLeave={(e) => {
+                  (e.target as HTMLElement).style.textDecoration = 'none'
                 }}
               >
                 회원가입

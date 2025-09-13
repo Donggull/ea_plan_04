@@ -233,3 +233,20 @@ body {
   margin: 0 auto;
   padding: 0 var(--linear-spacing-lg);
 }
+
+/* Animations */
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Responsive Design */
+@media (max-width: 640px) {
+  .linear-container {
+    padding: 0 var(--linear-spacing-md);
+  }
+}
