@@ -62,15 +62,14 @@ export function MainLayout() {
 
         {/* Main Content Area */}
         <main
-          className="flex-1 overflow-auto transition-all duration-300 ease-out"
+          className="flex-1 overflow-auto"
           style={{
-            marginLeft: !isMobile && isSidebarOpen ? `${sidebarWidth}px` : '0',
+            backgroundColor: 'var(--linear-bg-primary)'
           }}
         >
           <div
             className="w-full h-full"
             style={{
-              backgroundColor: 'var(--linear-bg-primary)',
               padding: 'var(--linear-spacing-lg)',
               paddingTop: 'var(--linear-spacing-md)'
             }}
