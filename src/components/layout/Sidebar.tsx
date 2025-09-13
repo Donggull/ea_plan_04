@@ -104,7 +104,7 @@ export function Sidebar({ isOpen, onClose, width, onWidthChange }: SidebarProps)
           width: `${width}px`,
           backgroundColor: 'var(--linear-bg-secondary)',
           borderRight: '1px solid var(--linear-border-primary)',
-          marginTop: '64px' // Header height
+          marginTop: '0px' // Remove margin to properly align with header
         }}
       >
         {/* Mobile Close Button */}
@@ -119,34 +119,56 @@ export function Sidebar({ isOpen, onClose, width, onWidthChange }: SidebarProps)
 
         <div className="flex flex-col h-full">
           {/* 프로젝트 선택기 */}
-          <div className="p-4 border-b" style={{ borderColor: 'var(--linear-border-primary)' }}>
+          <div
+            className="p-6 border-b"
+            style={{
+              borderColor: 'var(--linear-border-primary)',
+              paddingTop: '24px' // header와의 간격 추가
+            }}
+          >
             <div className="relative">
-              <button className="w-full flex items-center justify-between p-3 rounded-lg hover:bg-gray-700/50 transition-colors">
+              <button className="w-full flex items-center justify-between p-3 rounded-lg transition-colors linear-button-ghost">
                 <div className="flex items-center gap-3">
                   <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center">
                     <span className="text-sm font-bold text-white">E</span>
                   </div>
                   <div className="text-left">
-                    <div className="font-medium text-white text-sm">{selectedProject}</div>
-                    <div className="text-xs" style={{ color: 'var(--linear-text-tertiary)' }}>프로젝트</div>
+                    <div
+                      className="font-medium text-sm"
+                      style={{ color: 'var(--linear-text-primary)' }}
+                    >
+                      {selectedProject}
+                    </div>
+                    <div
+                      className="text-xs"
+                      style={{ color: 'var(--linear-text-tertiary)' }}
+                    >
+                      프로젝트
+                    </div>
                   </div>
                 </div>
-                <ChevronDown className="w-4 h-4" style={{ color: 'var(--linear-text-secondary)' }} />
+                <ChevronDown
+                  className="w-4 h-4"
+                  style={{ color: 'var(--linear-text-secondary)' }}
+                />
               </button>
             </div>
           </div>
 
           {/* Navigation */}
           <div className="flex-1 overflow-y-auto">
-            <div className="p-4">
+            <div className="p-6">
               <h2
                 className="text-xs font-medium mb-4 uppercase tracking-wider"
-                style={{ color: 'var(--linear-text-tertiary)' }}
+                style={{
+                  color: 'var(--linear-text-tertiary)',
+                  letterSpacing: '0.05em'
+                }}
               >
                 PROJECT NAVIGATION
               </h2>
 
-              <nav className="space-y-1">
+              <nav className="space-y-2">
                 {navigationItems.map((item) => {
                   const Icon = item.icon
                   return (
@@ -155,13 +177,17 @@ export function Sidebar({ isOpen, onClose, width, onWidthChange }: SidebarProps)
                       to={item.href}
                       onClick={onClose}
                       className={({ isActive }) => `
-                        flex items-center px-3 py-2.5 rounded-lg
-                        text-sm font-medium transition-colors
+                        flex items-center px-3 py-3 rounded-lg
+                        text-sm font-medium transition-all duration-200
                         ${isActive
-                          ? 'bg-white/5 text-white'
-                          : 'text-gray-400 hover:text-white hover:bg-white/5'
+                          ? 'linear-bg-blue-soft text-white border-l-2'
+                          : 'hover:bg-white/5'
                         }
                       `}
+                      style={({ isActive }) => ({
+                        color: isActive ? 'var(--linear-text-primary)' : 'var(--linear-text-secondary)',
+                        borderLeftColor: isActive ? 'var(--linear-accent-blue)' : 'transparent'
+                      })}
                     >
                       <div
                         className="w-2 h-2 rounded-full mr-3 flex-shrink-0"
@@ -175,15 +201,21 @@ export function Sidebar({ isOpen, onClose, width, onWidthChange }: SidebarProps)
               </nav>
 
               {/* 옵션 패널 */}
-              <div className="mt-6">
+              <div className="mt-8">
                 <h3
                   className="text-xs font-medium mb-3 uppercase tracking-wider"
-                  style={{ color: 'var(--linear-text-tertiary)' }}
+                  style={{
+                    color: 'var(--linear-text-tertiary)',
+                    letterSpacing: '0.05em'
+                  }}
                 >
                   옵션
                 </h3>
                 <div className="space-y-1">
-                  <button className="w-full flex items-center px-3 py-2.5 rounded-lg text-sm font-medium text-gray-400 hover:text-white hover:bg-white/5 transition-colors">
+                  <button
+                    className="w-full flex items-center px-3 py-3 rounded-lg text-sm font-medium transition-all duration-200 hover:bg-white/5"
+                    style={{ color: 'var(--linear-text-secondary)' }}
+                  >
                     <Settings className="w-4 h-4 mr-3 flex-shrink-0" />
                     <span>설정</span>
                   </button>
@@ -193,21 +225,39 @@ export function Sidebar({ isOpen, onClose, width, onWidthChange }: SidebarProps)
           </div>
 
           {/* API 사용량 및 토큰 현황 */}
-          <div className="p-4 border-t" style={{ borderColor: 'var(--linear-border-primary)' }}>
+          <div
+            className="p-6 border-t"
+            style={{
+              borderColor: 'var(--linear-border-primary)',
+              backgroundColor: 'var(--linear-bg-tertiary)'
+            }}
+          >
             {/* API 사용량 */}
-            <div className="mb-4">
-              <div className="flex items-center justify-between mb-2">
+            <div className="mb-6">
+              <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-2">
-                  <Activity className="w-4 h-4" style={{ color: 'var(--linear-accent-blue)' }} />
-                  <span className="text-sm font-medium" style={{ color: 'var(--linear-text-secondary)' }}>
+                  <Activity
+                    className="w-4 h-4"
+                    style={{ color: 'var(--linear-accent-blue)' }}
+                  />
+                  <span
+                    className="text-sm font-medium"
+                    style={{ color: 'var(--linear-text-primary)' }}
+                  >
                     API 사용량
                   </span>
                 </div>
-                <span className="text-xs" style={{ color: 'var(--linear-text-tertiary)' }}>
+                <span
+                  className="text-xs font-medium"
+                  style={{ color: 'var(--linear-accent-blue)' }}
+                >
                   75%
                 </span>
               </div>
-              <div className="w-full bg-gray-700 rounded-full h-2">
+              <div
+                className="w-full rounded-full h-2 mb-2"
+                style={{ backgroundColor: 'var(--linear-bg-primary)' }}
+              >
                 <div
                   className="h-2 rounded-full transition-all duration-300"
                   style={{
@@ -216,7 +266,10 @@ export function Sidebar({ isOpen, onClose, width, onWidthChange }: SidebarProps)
                   }}
                 />
               </div>
-              <div className="flex justify-between text-xs mt-1" style={{ color: 'var(--linear-text-muted)' }}>
+              <div
+                className="flex justify-between text-xs"
+                style={{ color: 'var(--linear-text-muted)' }}
+              >
                 <span>7,500 / 10,000 요청</span>
                 <span>이번 달</span>
               </div>
@@ -224,18 +277,30 @@ export function Sidebar({ isOpen, onClose, width, onWidthChange }: SidebarProps)
 
             {/* 토큰 소비 현황 */}
             <div>
-              <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-2">
-                  <Zap className="w-4 h-4" style={{ color: 'var(--linear-accent-yellow)' }} />
-                  <span className="text-sm font-medium" style={{ color: 'var(--linear-text-secondary)' }}>
+                  <Zap
+                    className="w-4 h-4"
+                    style={{ color: 'var(--linear-accent-yellow)' }}
+                  />
+                  <span
+                    className="text-sm font-medium"
+                    style={{ color: 'var(--linear-text-primary)' }}
+                  >
                     토큰 잔량
                   </span>
                 </div>
-                <span className="text-xs" style={{ color: 'var(--linear-text-tertiary)' }}>
+                <span
+                  className="text-xs font-medium"
+                  style={{ color: 'var(--linear-accent-orange)' }}
+                >
                   45%
                 </span>
               </div>
-              <div className="w-full bg-gray-700 rounded-full h-2">
+              <div
+                className="w-full rounded-full h-2 mb-2"
+                style={{ backgroundColor: 'var(--linear-bg-primary)' }}
+              >
                 <div
                   className="h-2 rounded-full transition-all duration-300"
                   style={{
@@ -244,9 +309,15 @@ export function Sidebar({ isOpen, onClose, width, onWidthChange }: SidebarProps)
                   }}
                 />
               </div>
-              <div className="flex justify-between text-xs mt-1" style={{ color: 'var(--linear-text-muted)' }}>
+              <div
+                className="flex justify-between text-xs items-center"
+                style={{ color: 'var(--linear-text-muted)' }}
+              >
                 <span>45K / 100K 토큰</span>
-                <button className="flex items-center gap-1 hover:underline">
+                <button
+                  className="flex items-center gap-1 hover:underline text-xs font-medium transition-colors"
+                  style={{ color: 'var(--linear-accent-blue)' }}
+                >
                   <CreditCard className="w-3 h-3" />
                   충전
                 </button>

@@ -51,7 +51,7 @@ export function MainLayout() {
       <Header onToggleSidebar={toggleSidebar} />
 
       {/* Layout Container */}
-      <div className="flex h-[calc(100vh-64px)]">
+      <div className="flex" style={{ marginTop: '64px', height: 'calc(100vh - 64px)' }}>
         {/* Sidebar */}
         <Sidebar
           isOpen={isSidebarOpen}
