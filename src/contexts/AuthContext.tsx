@@ -1,15 +1,20 @@
-import React, { createContext, useContext, useEffect, useState } from 'react'
-import type { User, Session } from '@supabase/supabase-js'
+import React, { createContext, useEffect, useState } from 'react'
+import type { User, Session, AuthError } from '@supabase/supabase-js'
 import { auth } from '@/lib/supabase/client'
+
+interface AuthResponse {
+  error: AuthError | null
+  data?: unknown
+}
 
 interface AuthContextType {
   user: User | null
   session: Session | null
   loading: boolean
-  signIn: (email: string, password: string) => Promise<{ error: any; data?: any }>
-  signUp: (email: string, password: string, additionalData?: Record<string, any>) => Promise<{ error: any; data?: any }>
-  signOut: () => Promise<{ error: any }>
-  getCurrentUser: () => Promise<{ data: { user: User | null }; error: any }>
+  signIn: (email: string, password: string) => Promise<AuthResponse>
+  signUp: (email: string, password: string, additionalData?: Record<string, unknown>) => Promise<AuthResponse>
+  signOut: () => Promise<{ error: AuthError | null }>
+  getCurrentUser: () => Promise<{ data: { user: User | null }; error: AuthError | null }>
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
@@ -98,13 +103,13 @@ export function AuthProvider({ children }: AuthProviderProps) {
       return result
     } catch (error) {
       console.error('로그인 중 예외 발생:', error)
-      return { error }
+      return { error: error as AuthError }
     } finally {
       setLoading(false)
     }
   }
 
-  const signUp = async (email: string, password: string, additionalData?: Record<string, any>) => {
+  const signUp = async (email: string, password: string, additionalData?: Record<string, unknown>) => {
     try {
       setLoading(true)
       const result = await auth.signUp(email, password, additionalData)
@@ -118,7 +123,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       return result
     } catch (error) {
       console.error('회원가입 중 예외 발생:', error)
-      return { error }
+      return { error: error as AuthError }
     } finally {
       setLoading(false)
     }
@@ -142,7 +147,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       return result
     } catch (error) {
       console.error('로그아웃 중 예외 발생:', error)
-      return { error }
+      return { error: error as AuthError }
     } finally {
       setLoading(false)
     }
@@ -154,7 +159,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       return result
     } catch (error) {
       console.error('사용자 정보 조회 중 오류:', error)
-      return { data: { user: null }, error }
+      return { data: { user: null }, error: error as AuthError }
     }
   }
 
@@ -175,10 +180,4 @@ export function AuthProvider({ children }: AuthProviderProps) {
   )
 }
 
-export function useAuth() {
-  const context = useContext(AuthContext)
-  if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider')
-  }
-  return context
-}
+export { AuthContext }

@@ -8,6 +8,8 @@ import type {
   ChatMessage,
   GeneratedImage
 } from '@/types/database'
+import type { RealtimePostgresChangesPayload } from '@supabase/supabase-js'
+import type { Json } from '@/types/supabase'
 
 // User/Profile queries
 export const userQueries = {
@@ -26,7 +28,7 @@ export const userQueries = {
   },
 
   // Update user profile
-  updateProfile: async (userId: string, updates: Partial<Omit<User, 'preferences'>> & { preferences?: any }) => {
+  updateProfile: async (userId: string, updates: Partial<Omit<User, 'preferences'>> & { preferences?: Json }) => {
     const { data, error } = await supabase
       .from('profiles')
       .update(updates)
@@ -111,7 +113,7 @@ export const projectQueries = {
   },
 
   // Create project
-  createProject: async (projectData: Omit<Project, 'id' | 'created_at' | 'updated_at' | 'metadata'> & { metadata?: any }) => {
+  createProject: async (projectData: Omit<Project, 'id' | 'created_at' | 'updated_at' | 'metadata'> & { metadata?: Json }) => {
     const { data, error } = await supabase
       .from('projects')
       .insert(projectData)
@@ -122,7 +124,7 @@ export const projectQueries = {
   },
 
   // Update project
-  updateProject: async (projectId: string, updates: Partial<Omit<Project, 'metadata'>> & { metadata?: any }) => {
+  updateProject: async (projectId: string, updates: Partial<Omit<Project, 'metadata'>> & { metadata?: Json }) => {
     const { data, error } = await supabase
       .from('projects')
       .update(updates)
@@ -217,7 +219,7 @@ export const imageQueries = {
   },
 
   // Save generated image
-  saveGeneratedImage: async (imageData: Omit<GeneratedImage, 'id' | 'created_at' | 'updated_at' | 'parameters'> & { parameters: any }) => {
+  saveGeneratedImage: async (imageData: Omit<GeneratedImage, 'id' | 'created_at' | 'updated_at' | 'parameters'> & { parameters: Json }) => {
     const { data, error } = await supabase
       .from('generated_images')
       .insert(imageData)
@@ -241,7 +243,7 @@ export const imageQueries = {
 // Real-time subscriptions
 export const realtimeSubscriptions = {
   // Subscribe to project updates
-  subscribeToProject: (projectId: string, callback: (payload: any) => void) => {
+  subscribeToProject: (projectId: string, callback: (payload: RealtimePostgresChangesPayload<Project>) => void) => {
     return supabase
       .channel(`project-${projectId}`)
       .on(
@@ -258,7 +260,7 @@ export const realtimeSubscriptions = {
   },
 
   // Subscribe to chat messages
-  subscribeToChatMessages: (sessionId: string, callback: (payload: any) => void) => {
+  subscribeToChatMessages: (sessionId: string, callback: (payload: RealtimePostgresChangesPayload<ChatMessage>) => void) => {
     return supabase
       .channel(`chat-${sessionId}`)
       .on(
@@ -275,7 +277,7 @@ export const realtimeSubscriptions = {
   },
 
   // Subscribe to generated images
-  subscribeToGeneratedImages: (projectId: string, callback: (payload: any) => void) => {
+  subscribeToGeneratedImages: (projectId: string, callback: (payload: RealtimePostgresChangesPayload<GeneratedImage>) => void) => {
     return supabase
       .channel(`images-${projectId}`)
       .on(
@@ -292,7 +294,7 @@ export const realtimeSubscriptions = {
   },
 
   // Unsubscribe from channel
-  unsubscribe: (subscription: any) => {
+  unsubscribe: (subscription: ReturnType<typeof supabase.channel>) => {
     return supabase.removeChannel(subscription)
   }
 }

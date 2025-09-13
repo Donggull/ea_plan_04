@@ -21,7 +21,21 @@
       "Bash(find:*)",
       "mcp__github-mcp__git-add",
       "Bash(npm run dev:*)",
-      "mcp__github-mcp__git-remove"
+      "mcp__github-mcp__git-remove",
+      "mcp__supabase__list_tables",
+      "mcp__supabase__apply_migration",
+      "mcp__supabase__execute_sql",
+      "mcp__playwright-stealth__playwright_navigate",
+      "mcp__playwright-stealth__playwright_screenshot",
+      "mcp__playwright-stealth__playwright_get_visible_text",
+      "mcp__playwright-stealth__playwright_console_logs",
+      "mcp__playwright-stealth__playwright_close",
+      "Bash(node:*)",
+      "Bash(winget search:*)",
+      "Bash(curl:*)",
+      "Bash(msiexec:*)",
+      "Bash(start nodejs-installer.msi)",
+      "Bash(git add:*)"
     ],
     "deny": [],
     "ask": []

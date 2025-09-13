@@ -15,7 +15,7 @@ export interface Organization extends BaseEntity {
   slug: string
   description?: string
   logo_url?: string
-  settings: Record<string, any>
+  settings: MetadataRecord
   owner_id: string
 }
 
@@ -63,7 +63,7 @@ export interface ProjectMetadata {
   budget?: number
   deadline?: string
   tags: string[]
-  custom_fields: Record<string, any>
+  custom_fields: MetadataRecord
 }
 
 // Planning Module types
@@ -145,7 +145,7 @@ export interface DeploymentLog {
   timestamp: string
   level: 'info' | 'warning' | 'error'
   message: string
-  details?: Record<string, any>
+  details?: MetadataRecord
 }
 
 // Development Module types
@@ -205,11 +205,7 @@ export interface ChatMessage extends BaseEntity {
   role: 'user' | 'assistant' | 'system'
   content: string
   tokens_used?: number
-  metadata?: {
-    function_calls?: any[]
-    attachments?: string[]
-    context_references?: string[]
-  }
+  metadata?: Json
 }
 
 export interface AIResponse extends BaseEntity {
@@ -222,7 +218,7 @@ export interface AIResponse extends BaseEntity {
   response_time_ms: number
   status: 'success' | 'error' | 'timeout'
   error_message?: string
-  metadata?: Record<string, any>
+  metadata?: MetadataRecord
 }
 
 // Image Generation types
@@ -264,7 +260,7 @@ export interface FileUpload extends BaseEntity {
   bucket: string
   is_public: boolean
   tags: string[]
-  metadata?: Record<string, any>
+  metadata?: MetadataRecord
 }
 
 // Notification types
@@ -276,7 +272,7 @@ export interface Notification extends BaseEntity {
   priority: 'low' | 'medium' | 'high'
   is_read: boolean
   action_url?: string
-  metadata?: Record<string, any>
+  metadata?: MetadataRecord
 }
 
 // Enum types (imported from main types)
@@ -284,6 +280,12 @@ export type UserRole = 'admin' | 'sub_admin' | 'member_1' | 'member_2' | 'member
 export type ProjectStatus = 'draft' | 'in_progress' | 'completed' | 'archived'
 export type WorkflowType = 'proposal' | 'construction' | 'operational'
 export type AIProvider = 'openai' | 'anthropic' | 'google'
+
+// Import Json type from Supabase types
+import type { Json } from './supabase'
+
+// Helper types for metadata and complex fields - using Json for Supabase compatibility
+type MetadataRecord = Json
 
 // Additional enum types
 export type ProjectPriority = 'low' | 'medium' | 'high' | 'urgent'
@@ -326,20 +328,20 @@ export interface ComponentProp {
   name: string
   type: string
   required: boolean
-  default_value?: any
+  default_value?: unknown
   description?: string
 }
 
 export interface ComponentVariant {
   name: string
-  props: Record<string, any>
+  props: MetadataRecord
   preview_url?: string
 }
 
 // Real-time subscription types
 export type TableName = keyof Database['public']['Tables']
 
-export interface RealtimePayload<T = any> {
+export interface RealtimePayload<T = Record<string, unknown>> {
   eventType: 'INSERT' | 'UPDATE' | 'DELETE'
   new: T | null
   old: T | null
@@ -347,14 +349,14 @@ export interface RealtimePayload<T = any> {
 }
 
 // API Response types
-export interface ApiResponse<T = any> {
+export interface ApiResponse<T = unknown> {
   data: T | null
   error: string | null
   message?: string
   status: number
 }
 
-export interface PaginatedResponse<T = any> extends ApiResponse<T[]> {
+export interface PaginatedResponse<T = unknown> extends ApiResponse<T[]> {
   pagination: {
     page: number
     limit: number

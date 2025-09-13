@@ -1,5 +1,6 @@
 import { createClient } from '@supabase/supabase-js'
 import type { Database } from '@/types/supabase'
+import type { AuthChangeEvent, Session, RealtimePostgresChangesPayload } from '@supabase/supabase-js'
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
@@ -32,7 +33,7 @@ export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey, {
 // Auth helper functions
 export const auth = {
   // Sign up with email and password
-  signUp: async (email: string, password: string, additionalData?: Record<string, any>) => {
+  signUp: async (email: string, password: string, additionalData?: Record<string, unknown>) => {
     return await supabase.auth.signUp({
       email,
       password,
@@ -66,7 +67,7 @@ export const auth = {
   },
 
   // Listen to auth changes
-  onAuthStateChange: (callback: (event: string, session: any) => void) => {
+  onAuthStateChange: (callback: (event: AuthChangeEvent, session: Session | null) => void) => {
     return supabase.auth.onAuthStateChange(callback)
   },
 }
@@ -81,7 +82,7 @@ export const db = {
   // Real-time subscriptions
   subscribe: (
     table: keyof Database['public']['Tables'],
-    callback: (payload: any) => void,
+    callback: (payload: RealtimePostgresChangesPayload<Record<string, unknown>>) => void,
     filter?: string
   ) => {
     const subscription = supabase
@@ -102,7 +103,7 @@ export const db = {
   },
 
   // Unsubscribe from real-time
-  unsubscribe: (subscription: any) => {
+  unsubscribe: (subscription: ReturnType<typeof supabase.channel>) => {
     return supabase.removeChannel(subscription)
   },
 }
@@ -110,7 +111,7 @@ export const db = {
 // Storage helper functions
 export const storage = {
   // Upload file
-  upload: async (bucket: string, path: string, file: File, options?: any) => {
+  upload: async (bucket: string, path: string, file: File, options?: { cacheControl?: string; upsert?: boolean }) => {
     return await supabase.storage.from(bucket).upload(path, file, options)
   },
 

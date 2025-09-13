@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Menu, Sun, Moon, User, LogOut, Settings } from 'lucide-react'
-import { useTheme } from '@/contexts/ThemeContext'
+import { useTheme } from '@/hooks/useTheme'
 
 interface HeaderProps {
   onToggleSidebar: () => void
