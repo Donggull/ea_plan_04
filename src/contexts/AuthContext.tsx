@@ -144,7 +144,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     }
 
     // beforeunload 이벤트 - 새로고침 감지
-    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+    const handleBeforeUnload = () => {
       // 새로고침이나 탭 닫기 구분
       isRefreshing = true
 
