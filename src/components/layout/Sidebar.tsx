@@ -3,7 +3,7 @@ interface SidebarProps {
   onClose: () => void
 }
 
-export function Sidebar({ isOpen, onClose: _ }: SidebarProps) {
+export function Sidebar({ isOpen: _, onClose: __ }: SidebarProps) {
   return (
     <aside className="fixed top-16 left-0 w-64 h-[calc(100vh-4rem)] bg-gray-800 border-r border-gray-600 z-30 lg:translate-x-0 -translate-x-full">
       <div className="p-4">
