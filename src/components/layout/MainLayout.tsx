@@ -5,17 +5,11 @@ import { Sidebar } from './Sidebar'
 
 export function MainLayout() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
-  const [isMobile, setIsMobile] = useState(false)
-  const [sidebarWidth, setSidebarWidth] = useState(280) // 기본 사이드바 너비
 
-  // 화면 크기 감지
+  // 화면 크기 감지 및 데스크톱에서 사이드바 자동 열기
   useEffect(() => {
     const handleResize = () => {
-      const mobile = window.innerWidth < 1024
-      setIsMobile(mobile)
-
-      // 데스크톱에서는 사이드바를 기본적으로 열어둠
-      if (!mobile) {
+      if (window.innerWidth >= 1024) {
         setIsSidebarOpen(true)
       } else {
         setIsSidebarOpen(false)
@@ -36,13 +30,7 @@ export function MainLayout() {
   }
 
   const closeSidebar = () => {
-    if (isMobile) {
-      setIsSidebarOpen(false)
-    }
-  }
-
-  const handleSidebarWidthChange = (width: number) => {
-    setSidebarWidth(width)
+    setIsSidebarOpen(false)
   }
 
   return (
@@ -53,19 +41,12 @@ export function MainLayout() {
       {/* Layout Container */}
       <div className="flex" style={{ marginTop: '64px', height: 'calc(100vh - 64px)' }}>
         {/* Sidebar */}
-        <Sidebar
-          isOpen={isSidebarOpen}
-          onClose={closeSidebar}
-          width={sidebarWidth}
-          onWidthChange={handleSidebarWidthChange}
-        />
+        <Sidebar isOpen={isSidebarOpen} onClose={closeSidebar} />
 
-        {/* Main Content Area */}
+        {/* Main Content */}
         <main
           className="flex-1 overflow-auto"
-          style={{
-            backgroundColor: 'var(--linear-bg-primary)'
-          }}
+          style={{ backgroundColor: 'var(--linear-bg-primary)' }}
         >
           <div
             className="w-full h-full"
