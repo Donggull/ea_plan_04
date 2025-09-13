@@ -126,29 +126,28 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
           <button
             onClick={() => toggleExpanded(item.id)}
             className={cn(
-              'flex items-center justify-between w-full px-4 py-3 text-left transition-colors rounded-lg mx-2 mb-1',
-              'hover:bg-gray-100 dark:hover:bg-gray-800',
-              isActive && 'bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400',
-              level > 0 && 'ml-4 px-3 py-2'
+              'linear-sidebar-item w-full',
+              isActive && 'active',
+              level > 0 && 'ml-4'
             )}
           >
-            <div className="flex items-center space-x-3">
+            <div className="linear-flex-start linear-gap-sm">
               <Icon className={cn(
                 'w-5 h-5',
-                isActive ? 'text-blue-600 dark:text-blue-400' : 'text-gray-500 dark:text-gray-400'
+                isActive ? 'linear-accent-blue' : 'linear-text-tertiary'
               )} />
               <span className={cn(
-                'font-medium text-sm',
-                isActive ? 'text-blue-600 dark:text-blue-400' : 'text-gray-700 dark:text-gray-300'
+                'linear-text-regular font-medium',
+                isActive ? 'linear-accent-blue' : 'linear-text-secondary'
               )}>
                 {item.title}
               </span>
             </div>
             {hasChildren && (
               isExpanded ? (
-                <ChevronDown className="w-4 h-4 text-gray-400" />
+                <ChevronDown className="w-4 h-4 linear-text-muted" />
               ) : (
-                <ChevronRight className="w-4 h-4 text-gray-400" />
+                <ChevronRight className="w-4 h-4 linear-text-muted" />
               )
             )}
           </button>
@@ -157,20 +156,19 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
             to={item.path!}
             onClick={onClose}
             className={({ isActive }) => cn(
-              'flex items-center space-x-3 px-4 py-3 transition-colors rounded-lg mx-2 mb-1',
-              'hover:bg-gray-100 dark:hover:bg-gray-800',
-              isActive && 'bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400',
-              level > 0 && 'ml-4 px-3 py-2'
+              'linear-sidebar-item',
+              isActive && 'active',
+              level > 0 && 'ml-4'
             )}
           >
             <Icon className="w-5 h-5" />
-            <span className="font-medium text-sm">{item.title}</span>
+            <span className="linear-text-regular font-medium">{item.title}</span>
           </NavLink>
         )}
 
         {/* 하위 메뉴 아이템들 */}
         {hasChildren && isExpanded && (
-          <div className="ml-4 space-y-1">
+          <div className="ml-4 linear-gap-xs">
             {item.children!.map(child => renderMenuItem(child, level + 1))}
           </div>
         )}
@@ -191,31 +189,31 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
       {/* 사이드바 */}
       <aside
         className={cn(
-          'fixed top-16 left-0 z-30 h-[calc(100vh-4rem)] bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-700 transition-transform duration-300',
-          'w-64 lg:w-80', // 가변 너비: 240-400px 사이
+          'linear-sidebar transition-transform duration-linear-normal',
+          'w-64 lg:w-80',
           isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
         )}
       >
-        <div className="flex flex-col h-full">
+        <div className="linear-flex-col h-full">
           {/* 사이드바 헤더 */}
-          <div className="p-4 border-b border-gray-200 dark:border-gray-700">
-            <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+          <div className="linear-sidebar-group">
+            <h2 className="linear-sidebar-title">
               프로젝트 메뉴
             </h2>
           </div>
 
           {/* 메뉴 아이템들 */}
           <nav className="flex-1 overflow-y-auto py-4">
-            <div className="space-y-1">
+            <div className="linear-gap-xs">
               {menuItems.map(item => renderMenuItem(item))}
             </div>
           </nav>
 
           {/* 사이드바 푸터 */}
-          <div className="p-4 border-t border-gray-200 dark:border-gray-700">
-            <button className="flex items-center space-x-3 w-full px-4 py-2 text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors">
+          <div className="linear-sidebar-group">
+            <button className="linear-sidebar-item w-full">
               <HelpCircle className="w-5 h-5" />
-              <span>도움말</span>
+              <span className="linear-text-regular">도움말</span>
             </button>
           </div>
         </div>

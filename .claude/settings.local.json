@@ -35,7 +35,8 @@
       "Bash(curl:*)",
       "Bash(msiexec:*)",
       "Bash(start nodejs-installer.msi)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(git commit:*)"
     ],
     "deny": [],
     "ask": []
