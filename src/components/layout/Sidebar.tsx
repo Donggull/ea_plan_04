@@ -39,7 +39,7 @@ const menuItems: MenuItem[] = [
   },
   {
     id: 'planning',
-    title: '기획',
+    title: '기획 진행',
     icon: FileText,
     children: [
       { id: 'proposal', title: '제안 진행', icon: FileText, path: '/planning/proposal' },
@@ -49,7 +49,7 @@ const menuItems: MenuItem[] = [
   },
   {
     id: 'design',
-    title: '디자인',
+    title: '구축 관리',
     icon: Palette,
     children: [
       { id: 'workflow', title: '워크플로우', icon: Palette, path: '/design/workflow' },
@@ -58,7 +58,7 @@ const menuItems: MenuItem[] = [
   },
   {
     id: 'publishing',
-    title: '퍼블리싱',
+    title: '개발',
     icon: Code,
     children: [
       { id: 'canvas', title: '코드 캔버스', icon: Code, path: '/publishing/canvas' },
@@ -67,7 +67,7 @@ const menuItems: MenuItem[] = [
   },
   {
     id: 'development',
-    title: '개발',
+    title: '업종 분석',
     icon: Wrench,
     children: [
       { id: 'environment', title: '환경 관리', icon: Settings, path: '/development/environment' },
@@ -120,31 +120,31 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
     const Icon = item.icon
 
     return (
-      <div key={item.id} className="w-full">
+      <div key={item.id}>
         {/* 메인 메뉴 아이템 */}
         {hasChildren ? (
           <button
             onClick={() => toggleExpanded(item.id)}
             className={cn(
-              'w-full flex items-center justify-between px-3 py-2 text-sm transition-colors rounded-lg',
-              isActive ? 'text-blue-400 bg-blue-500/10' : 'text-gray-300 hover:text-white hover:bg-gray-800',
+              'w-full flex items-center justify-between px-3 py-2 text-sm rounded-md transition-colors',
+              isActive
+                ? 'text-blue-400 bg-blue-500/10'
+                : 'text-gray-300 hover:text-white hover:bg-gray-800',
               level > 0 && 'ml-4'
             )}
           >
-            <div className="flex items-center gap-3">
+            <div className="flex items-center space-x-3">
               <Icon className={cn(
-                'w-5 h-5',
+                'w-5 h-5 flex-shrink-0',
                 isActive ? 'text-blue-400' : 'text-gray-400'
               )} />
-              <span className="font-medium">
-                {item.title}
-              </span>
+              <span className="font-medium">{item.title}</span>
             </div>
             {hasChildren && (
               isExpanded ? (
-                <ChevronDown className="w-4 h-4 text-gray-500" />
+                <ChevronDown className="w-4 h-4 text-gray-500 flex-shrink-0" />
               ) : (
-                <ChevronRight className="w-4 h-4 text-gray-500" />
+                <ChevronRight className="w-4 h-4 text-gray-500 flex-shrink-0" />
               )
             )}
           </button>
@@ -153,19 +153,21 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
             to={item.path!}
             onClick={onClose}
             className={({ isActive }) => cn(
-              'flex items-center gap-3 px-3 py-2 text-sm transition-colors rounded-lg',
-              isActive ? 'text-blue-400 bg-blue-500/10 border-l-2 border-blue-400' : 'text-gray-300 hover:text-white hover:bg-gray-800',
+              'flex items-center space-x-3 px-3 py-2 text-sm rounded-md transition-colors',
+              isActive
+                ? 'text-blue-400 bg-blue-500/10 border-l-2 border-blue-400'
+                : 'text-gray-300 hover:text-white hover:bg-gray-800',
               level > 0 && 'ml-4'
             )}
           >
-            <Icon className="w-5 h-5" />
+            <Icon className="w-5 h-5 flex-shrink-0" />
             <span className="font-medium">{item.title}</span>
           </NavLink>
         )}
 
         {/* 하위 메뉴 아이템들 */}
         {hasChildren && isExpanded && (
-          <div className="ml-6 space-y-1">
+          <div className="ml-6 mt-1 space-y-1">
             {item.children!.map(child => renderMenuItem(child, level + 1))}
           </div>
         )}
@@ -186,30 +188,30 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
       {/* 사이드바 */}
       <aside
         className={cn(
-          'fixed top-16 left-0 h-[calc(100vh-4rem)] w-64 lg:w-80 z-40',
+          'fixed top-16 left-0 h-[calc(100vh-4rem)] w-64 lg:w-80 z-30',
           'bg-gray-900 border-r border-gray-700 transition-transform duration-300',
           isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
         )}
       >
         <div className="flex flex-col h-full">
           {/* 사이드바 헤더 */}
-          <div className="p-6 border-b border-gray-700">
+          <div className="p-4 border-b border-gray-700">
             <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-wider">
               프로젝트 메뉴
             </h2>
           </div>
 
           {/* 메뉴 아이템들 */}
-          <nav className="flex-1 overflow-y-auto py-4">
-            <div className="space-y-1 px-3">
+          <nav className="flex-1 overflow-y-auto p-3">
+            <div className="space-y-1">
               {menuItems.map(item => renderMenuItem(item))}
             </div>
           </nav>
 
           {/* 사이드바 푸터 */}
           <div className="p-3 border-t border-gray-700">
-            <button className="w-full flex items-center gap-3 px-3 py-2 text-sm text-gray-300 hover:text-white hover:bg-gray-800 rounded-lg transition-colors">
-              <HelpCircle className="w-5 h-5" />
+            <button className="w-full flex items-center space-x-3 px-3 py-2 text-sm text-gray-300 hover:text-white hover:bg-gray-800 rounded-md transition-colors">
+              <HelpCircle className="w-5 h-5 flex-shrink-0" />
               <span>도움말</span>
             </button>
           </div>
