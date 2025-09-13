@@ -53,11 +53,7 @@ export function MainLayout() {
 
         {/* Main Content Area */}
         <main
-          className={cn(
-            'flex-1 transition-all duration-300 ease-out',
-            // PRD 규칙: 사이드바는 w-64 (256px) 고정
-            !isMobile && isSidebarOpen ? 'lg:ml-64' : 'ml-0'
-          )}
+          className="flex-1 lg:ml-64"
           style={{
             paddingTop: '0',
             backgroundColor: 'var(--linear-bg-primary)',
