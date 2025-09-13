@@ -24,7 +24,7 @@ export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey, {
   },
   global: {
     headers: {
-      'x-application-name': 'ELUO Platform',
+      'x-application-name': 'Eluo Platform',
     },
   },
 })

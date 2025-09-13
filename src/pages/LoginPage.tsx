@@ -103,7 +103,7 @@ export function LoginPage() {
               marginBottom: 'var(--linear-spacing-sm)'
             }}
           >
-            ELUO Platform
+            Eluo Platform
           </h1>
 
           <p

@@ -66,7 +66,7 @@ export function Header({ onToggleSidebar }: HeaderProps) {
                 margin: 0
               }}
             >
-              ELUO Platform
+              Eluo Platform
             </h1>
           </div>
         </div>
