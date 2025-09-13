@@ -1,1 +1,235 @@
-import { useQuery } from '@tanstack/react-query'\nimport { formatDistanceToNow } from 'date-fns'\nimport { ko } from 'date-fns/locale'\nimport {\n  FileText,\n  ImageIcon,\n  Users,\n  Settings,\n  MessageCircle,\n  CheckCircle,\n  AlertCircle,\n  Clock\n} from 'lucide-react'\nimport { queryKeys } from '@/lib/react-query'\n\n// 활동 타입 정의\ninterface Activity {\n  id: string\n  type: 'project' | 'image' | 'chat' | 'team' | 'system'\n  action: string\n  description: string\n  user: {\n    id: string\n    name: string\n    avatar?: string\n  }\n  timestamp: string\n  metadata?: Record<string, any>\n}\n\n// 모킹 데이터 (실제로는 Supabase에서 가져옴)\nconst mockActivities: Activity[] = [\n  {\n    id: '1',\n    type: 'project',\n    action: 'created',\n    description: '\"모바일 앱 리뉴얼\" 프로젝트를 생성했습니다',\n    user: { id: 'user1', name: '김개발' },\n    timestamp: new Date(Date.now() - 1000 * 60 * 30).toISOString(), // 30분 전\n  },\n  {\n    id: '2',\n    type: 'image',\n    action: 'generated',\n    description: 'AI 이미지 3개를 생성했습니다',\n    user: { id: 'user2', name: '박디자인' },\n    timestamp: new Date(Date.now() - 1000 * 60 * 60 * 2).toISOString(), // 2시간 전\n  },\n  {\n    id: '3',\n    type: 'chat',\n    action: 'conversation',\n    description: 'AI 챗봇과 대화를 시작했습니다',\n    user: { id: 'user3', name: '이기획' },\n    timestamp: new Date(Date.now() - 1000 * 60 * 60 * 4).toISOString(), // 4시간 전\n  },\n  {\n    id: '4',\n    type: 'project',\n    action: 'completed',\n    description: '\"웹사이트 개편\" 프로젝트를 완료했습니다',\n    user: { id: 'user1', name: '김개발' },\n    timestamp: new Date(Date.now() - 1000 * 60 * 60 * 6).toISOString(), // 6시간 전\n  },\n  {\n    id: '5',\n    type: 'team',\n    action: 'joined',\n    description: '새 팀 멤버가 합류했습니다',\n    user: { id: 'user4', name: '최신입' },\n    timestamp: new Date(Date.now() - 1000 * 60 * 60 * 8).toISOString(), // 8시간 전\n  },\n  {\n    id: '6',\n    type: 'system',\n    action: 'updated',\n    description: '시스템 설정이 업데이트되었습니다',\n    user: { id: 'system', name: '시스템' },\n    timestamp: new Date(Date.now() - 1000 * 60 * 60 * 12).toISOString(), // 12시간 전\n  }\n]\n\nexport function RecentActivity() {\n  // 최근 활동 데이터 쿼리\n  const { data: activities, isLoading } = useQuery({\n    queryKey: queryKeys.analytics.activity(),\n    queryFn: async () => {\n      // TODO: 실제 Supabase 쿼리로 대체\n      await new Promise(resolve => setTimeout(resolve, 800))\n      return mockActivities\n    },\n    staleTime: 1000 * 60 * 2, // 2분\n    refetchInterval: 1000 * 60 * 5, // 5분마다 자동 새로고침\n  })\n\n  const getActivityIcon = (type: Activity['type'], action: string) => {\n    switch (type) {\n      case 'project':\n        if (action === 'completed') {\n          return <CheckCircle className=\"w-4 h-4 linear-accent-green\" />\n        }\n        return <FileText className=\"w-4 h-4 linear-accent-blue\" />\n      case 'image':\n        return <ImageIcon className=\"w-4 h-4 linear-accent-orange\" />\n      case 'chat':\n        return <MessageCircle className=\"w-4 h-4 linear-accent-plan\" />\n      case 'team':\n        return <Users className=\"w-4 h-4 linear-accent-security\" />\n      case 'system':\n        return <Settings className=\"w-4 h-4 linear-accent-build\" />\n      default:\n        return <AlertCircle className=\"w-4 h-4 linear-text-muted\" />\n    }\n  }\n\n  const getActivityColor = (type: Activity['type'], action: string) => {\n    switch (type) {\n      case 'project':\n        return action === 'completed' ? 'linear-accent-green' : 'linear-accent-blue'\n      case 'image':\n        return 'linear-accent-orange'\n      case 'chat':\n        return 'linear-accent-plan'\n      case 'team':\n        return 'linear-accent-security'\n      case 'system':\n        return 'linear-accent-build'\n      default:\n        return 'linear-text-muted'\n    }\n  }\n\n  if (isLoading) {\n    return (\n      <div className=\"linear-card\">\n        <h3 className=\"linear-title-2 mb-4\">최근 활동</h3>\n        <div className=\"space-y-4\">\n          {[...Array(6)].map((_, i) => (\n            <div key={i} className=\"linear-animate-pulse\">\n              <div className=\"linear-flex-start linear-gap-sm\">\n                <div className=\"w-8 h-8 bg-background-tertiary rounded-full\"></div>\n                <div className=\"flex-1\">\n                  <div className=\"h-4 bg-background-tertiary rounded mb-2\"></div>\n                  <div className=\"h-3 bg-background-tertiary rounded w-24\"></div>\n                </div>\n              </div>\n            </div>\n          ))}\n        </div>\n      </div>\n    )\n  }\n\n  return (\n    <div className=\"linear-card\">\n      <div className=\"linear-flex-between mb-4\">\n        <h3 className=\"linear-title-2\">최근 활동</h3>\n        <button className=\"linear-button-ghost linear-button-sm\">\n          전체 보기\n        </button>\n      </div>\n      \n      <div className=\"space-y-4\">\n        {activities?.map((activity, index) => {\n          const isFirst = index === 0\n          const isLast = index === (activities.length - 1)\n          \n          return (\n            <div\n              key={activity.id}\n              className={`relative linear-animate-fade-in ${\n                !isLast ? 'pb-4' : ''\n              }`}\n              style={{ animationDelay: `${index * 100}ms` }}\n            >\n              {/* 타임라인 라인 */}\n              {!isLast && (\n                <div className=\"absolute left-4 top-8 bottom-0 w-px bg-border-primary\"></div>\n              )}\n              \n              <div className=\"linear-flex-start linear-gap-sm\">\n                {/* 아이콘 */}\n                <div className={`relative z-10 w-8 h-8 rounded-full bg-background-secondary border-2 border-border-primary linear-flex-center ${\n                  isFirst ? 'ring-2 ring-accent-blue/20' : ''\n                }`}>\n                  {getActivityIcon(activity.type, activity.action)}\n                </div>\n                \n                {/* 활동 내용 */}\n                <div className=\"flex-1 min-w-0\">\n                  <div className=\"linear-flex-between items-start\">\n                    <div className=\"flex-1\">\n                      <p className=\"linear-text-regular linear-text-primary mb-1\">\n                        <span className=\"font-medium\">{activity.user.name}</span>\n                        <span className=\"linear-text-tertiary mx-1\">가</span>\n                        {activity.description}\n                      </p>\n                      \n                      <div className=\"linear-flex-start linear-gap-xs\">\n                        <Clock className=\"w-3 h-3 linear-text-muted\" />\n                        <time className=\"linear-text-mini linear-text-muted\">\n                          {formatDistanceToNow(new Date(activity.timestamp), {\n                            addSuffix: true,\n                            locale: ko\n                          })}\n                        </time>\n                      </div>\n                    </div>\n                    \n                    {/* 사용자 아바타 */}\n                    <div className=\"flex-shrink-0 ml-3\">\n                      {activity.user.avatar ? (\n                        <img\n                          src={activity.user.avatar}\n                          alt={activity.user.name}\n                          className=\"w-6 h-6 rounded-full\"\n                        />\n                      ) : (\n                        <div className=\"w-6 h-6 rounded-full bg-gradient-to-br from-accent-blue to-accent-indigo linear-flex-center\">\n                          <span className=\"linear-text-micro text-white font-medium\">\n                            {activity.user.name.charAt(0)}\n                          </span>\n                        </div>\n                      )}\n                    </div>\n                  </div>\n                </div>\n              </div>\n            </div>\n          )\n        })}\n      </div>\n      \n      {/* 빈 상태 */}\n      {activities && activities.length === 0 && (\n        <div className=\"text-center py-8\">\n          <Clock className=\"w-8 h-8 linear-text-muted mx-auto mb-3\" />\n          <p className=\"linear-text-regular linear-text-tertiary\">아직 활동 내역이 없습니다.</p>\n          <p className=\"linear-text-small linear-text-muted\">프로젝트를 시작하여 활동을 기록해보세요.</p>\n        </div>\n      )}\n    </div>\n  )\n}
+import { useQuery } from '@tanstack/react-query'
+import { formatDistanceToNow } from 'date-fns'
+import { ko } from 'date-fns/locale'
+import {
+  FileText,
+  ImageIcon,
+  Users,
+  Settings,
+  MessageCircle,
+  CheckCircle,
+  AlertCircle,
+  Clock
+} from 'lucide-react'
+import { queryKeys } from '@/lib/react-query'
+
+interface Activity {
+  id: string
+  type: 'project' | 'image' | 'chat' | 'team' | 'system'
+  action: string
+  description: string
+  user: {
+    id: string
+    name: string
+    avatar?: string
+  }
+  timestamp: string
+  metadata?: Record<string, any>
+}
+
+const mockActivities: Activity[] = [
+  {
+    id: '1',
+    type: 'project',
+    action: 'created',
+    description: '"모바일 앱 리뉴얼" 프로젝트를 생성했습니다',
+    user: { id: 'user1', name: '김개발' },
+    timestamp: new Date(Date.now() - 1000 * 60 * 30).toISOString(),
+  },
+  {
+    id: '2',
+    type: 'image',
+    action: 'generated',
+    description: 'AI 이미지 3개를 생성했습니다',
+    user: { id: 'user2', name: '박디자인' },
+    timestamp: new Date(Date.now() - 1000 * 60 * 60 * 2).toISOString(),
+  },
+  {
+    id: '3',
+    type: 'chat',
+    action: 'conversation',
+    description: 'AI 챗봇과 대화를 시작했습니다',
+    user: { id: 'user3', name: '이기획' },
+    timestamp: new Date(Date.now() - 1000 * 60 * 60 * 4).toISOString(),
+  },
+  {
+    id: '4',
+    type: 'project',
+    action: 'completed',
+    description: '"웹사이트 개편" 프로젝트를 완료했습니다',
+    user: { id: 'user1', name: '김개발' },
+    timestamp: new Date(Date.now() - 1000 * 60 * 60 * 6).toISOString(),
+  },
+  {
+    id: '5',
+    type: 'team',
+    action: 'joined',
+    description: '새 팀 멤버가 합류했습니다',
+    user: { id: 'user4', name: '최신입' },
+    timestamp: new Date(Date.now() - 1000 * 60 * 60 * 8).toISOString(),
+  },
+  {
+    id: '6',
+    type: 'system',
+    action: 'updated',
+    description: '시스템 설정이 업데이트되었습니다',
+    user: { id: 'system', name: '시스템' },
+    timestamp: new Date(Date.now() - 1000 * 60 * 60 * 12).toISOString(),
+  }
+]
+
+export function RecentActivity() {
+  const { data: activities, isLoading } = useQuery({
+    queryKey: queryKeys.analytics.activity(),
+    queryFn: async () => {
+      await new Promise(resolve => setTimeout(resolve, 800))
+      return mockActivities
+    },
+    staleTime: 1000 * 60 * 2,
+    refetchInterval: 1000 * 60 * 5,
+  })
+
+  const getActivityIcon = (type: Activity['type'], action: string) => {
+    switch (type) {
+      case 'project':
+        if (action === 'completed') {
+          return <CheckCircle className="w-4 h-4 linear-accent-green" />
+        }
+        return <FileText className="w-4 h-4 linear-accent-blue" />
+      case 'image':
+        return <ImageIcon className="w-4 h-4 linear-accent-orange" />
+      case 'chat':
+        return <MessageCircle className="w-4 h-4 linear-accent-plan" />
+      case 'team':
+        return <Users className="w-4 h-4 linear-accent-security" />
+      case 'system':
+        return <Settings className="w-4 h-4 linear-accent-build" />
+      default:
+        return <AlertCircle className="w-4 h-4 linear-text-muted" />
+    }
+  }
+
+  const getActivityColor = (type: Activity['type'], action: string) => {
+    switch (type) {
+      case 'project':
+        return action === 'completed' ? 'linear-accent-green' : 'linear-accent-blue'
+      case 'image':
+        return 'linear-accent-orange'
+      case 'chat':
+        return 'linear-accent-plan'
+      case 'team':
+        return 'linear-accent-security'
+      case 'system':
+        return 'linear-accent-build'
+      default:
+        return 'linear-text-muted'
+    }
+  }
+
+  if (isLoading) {
+    return (
+      <div className="linear-card">
+        <h3 className="linear-title-2 mb-4">최근 활동</h3>
+        <div className="space-y-4">
+          {[...Array(6)].map((_, i) => (
+            <div key={i} className="linear-animate-pulse">
+              <div className="linear-flex-start linear-gap-sm">
+                <div className="w-8 h-8 bg-background-tertiary rounded-full"></div>
+                <div className="flex-1">
+                  <div className="h-4 bg-background-tertiary rounded mb-2"></div>
+                  <div className="h-3 bg-background-tertiary rounded w-24"></div>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div className="linear-card">
+      <div className="linear-flex-between mb-4">
+        <h3 className="linear-title-2">최근 활동</h3>
+        <button className="linear-button-ghost linear-button-sm">
+          전체 보기
+        </button>
+      </div>
+
+      <div className="space-y-4">
+        {activities?.map((activity, index) => {
+          const isFirst = index === 0
+          const isLast = index === (activities.length - 1)
+
+          return (
+            <div
+              key={activity.id}
+              className={`relative linear-animate-fade-in ${
+                !isLast ? 'pb-4' : ''
+              }`}
+              style={{ animationDelay: `${index * 100}ms` }}
+            >
+              {!isLast && (
+                <div className="absolute left-4 top-8 bottom-0 w-px bg-border-primary"></div>
+              )}
+
+              <div className="linear-flex-start linear-gap-sm">
+                <div className={`relative z-10 w-8 h-8 rounded-full bg-background-secondary border-2 border-border-primary linear-flex-center ${
+                  isFirst ? 'ring-2 ring-accent-blue/20' : ''
+                }`}>
+                  {getActivityIcon(activity.type, activity.action)}
+                </div>
+
+                <div className="flex-1 min-w-0">
+                  <div className="linear-flex-between items-start">
+                    <div className="flex-1">
+                      <p className="linear-text-regular linear-text-primary mb-1">
+                        <span className="font-medium">{activity.user.name}</span>
+                        <span className="linear-text-tertiary mx-1">가</span>
+                        {activity.description}
+                      </p>
+
+                      <div className="linear-flex-start linear-gap-xs">
+                        <Clock className="w-3 h-3 linear-text-muted" />
+                        <time className="linear-text-mini linear-text-muted">
+                          {formatDistanceToNow(new Date(activity.timestamp), {
+                            addSuffix: true,
+                            locale: ko
+                          })}
+                        </time>
+                      </div>
+                    </div>
+
+                    <div className="flex-shrink-0 ml-3">
+                      {activity.user.avatar ? (
+                        <img
+                          src={activity.user.avatar}
+                          alt={activity.user.name}
+                          className="w-6 h-6 rounded-full"
+                        />
+                      ) : (
+                        <div className="w-6 h-6 rounded-full bg-gradient-to-br from-accent-blue to-accent-indigo linear-flex-center">
+                          <span className="linear-text-micro text-white font-medium">
+                            {activity.user.name.charAt(0)}
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )
+        })}
+      </div>
+
+      {activities && activities.length === 0 && (
+        <div className="text-center py-8">
+          <Clock className="w-8 h-8 linear-text-muted mx-auto mb-3" />
+          <p className="linear-text-regular linear-text-tertiary">아직 활동 내역이 없습니다.</p>
+          <p className="linear-text-small linear-text-muted">프로젝트를 시작하여 활동을 기록해보세요.</p>
+        </div>
+      )}
+    </div>
+  )
+}

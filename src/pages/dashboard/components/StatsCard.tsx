@@ -52,28 +52,52 @@ export function StatsCard({
 
   if (isLoading) {
     return (
-      <div className=\"linear-card linear-animate-pulse\">
-        <div className=\"linear-flex-between\">
-          <div className=\"flex-1\">
-            <div className=\"h-4 bg-background-tertiary rounded mb-3\"></div>
-            <div className=\"h-8 bg-background-tertiary rounded w-16\"></div>
+      <div className="linear-card linear-animate-pulse">
+        <div className="linear-flex-between">
+          <div className="flex-1">
+            <div className="h-4 bg-background-tertiary rounded mb-3"></div>
+            <div className="h-8 bg-background-tertiary rounded w-16"></div>
           </div>
-          <div className=\"w-12 h-12 bg-background-tertiary rounded-linear-lg\"></div>
+          <div className="w-12 h-12 bg-background-tertiary rounded-linear-lg"></div>
         </div>
       </div>
     )
   }
 
   return (
-    <div className=\"linear-card hover:shadow-linear-md transition-all duration-linear-normal\">
-      <div className=\"linear-flex-between\">
-        <div className=\"flex-1\">
-          <p className=\"linear-text-small linear-text-muted mb-2\">
+    <div className="linear-card hover:shadow-linear-md transition-all duration-linear-normal">
+      <div className="linear-flex-between">
+        <div className="flex-1">
+          <p className="linear-text-small linear-text-muted mb-2">
             {title}
           </p>
-          <div className=\"linear-flex-start linear-gap-sm items-end\">
-            <p className=\"linear-title-3 linear-text-primary font-bold\">
+          <div className="linear-flex-start linear-gap-sm items-end">
+            <p className="linear-title-3 linear-text-primary font-bold">
               {value.toLocaleString()}
             </p>
             {trend !== undefined && (
-              <div className={`linear-flex-center linear-gap-xs ${\n                trend >= 0 ? 'linear-accent-green' : 'linear-accent-red'\n              }`}>\n                {trend >= 0 ? (\n                  <TrendingUp className=\"w-3 h-3\" />\n                ) : (\n                  <TrendingDown className=\"w-3 h-3\" />\n                )}\n                <span className=\"linear-text-mini font-medium\">\n                  {Math.abs(trend).toFixed(1)}%\n                </span>\n              </div>\n            )}\n          </div>\n        </div>\n        \n        <div className={`w-12 h-12 rounded-linear-lg linear-flex-center ${colorClass.bg}`}>\n          <div className={colorClass.icon}>\n            {icon}\n          </div>\n        </div>\n      </div>\n    </div>\n  )\n}
+              <div className={`linear-flex-center linear-gap-xs ${
+                trend >= 0 ? 'linear-accent-green' : 'linear-accent-red'
+              }`}>
+                {trend >= 0 ? (
+                  <TrendingUp className="w-3 h-3" />
+                ) : (
+                  <TrendingDown className="w-3 h-3" />
+                )}
+                <span className="linear-text-mini font-medium">
+                  {Math.abs(trend).toFixed(1)}%
+                </span>
+              </div>
+            )}
+          </div>
+        </div>
+
+        <div className={`w-12 h-12 rounded-linear-lg linear-flex-center ${colorClass.bg}`}>
+          <div className={colorClass.icon}>
+            {icon}
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}

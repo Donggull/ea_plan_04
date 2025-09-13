@@ -1,3 +1,240 @@
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import {\n  AreaChart,\n  Area,\n  XAxis,\n  YAxis,\n  CartesianGrid,\n  Tooltip,\n  ResponsiveContainer,\n  BarChart,\n  Bar\n} from 'recharts'\nimport { Calendar, BarChart3, TrendingUp } from 'lucide-react'\nimport { queryKeys } from '@/lib/react-query'\n\n// 차트 데이터 타입\ninterface ChartData {\n  name: string\n  projects: number\n  completed: number\n  active: number\n}\n\n// 모킹 데이터 (실제로는 Supabase에서 가져옴)\nconst mockChartData: ChartData[] = [\n  { name: '1월', projects: 12, completed: 8, active: 4 },\n  { name: '2월', projects: 15, completed: 10, active: 5 },\n  { name: '3월', projects: 18, completed: 12, active: 6 },\n  { name: '4월', projects: 22, completed: 16, active: 6 },\n  { name: '5월', projects: 25, completed: 18, active: 7 },\n  { name: '6월', projects: 28, completed: 20, active: 8 },\n  { name: '7월', projects: 32, completed: 23, active: 9 },\n  { name: '8월', projects: 35, completed: 25, active: 10 },\n  { name: '9월', projects: 38, completed: 28, active: 10 },\n  { name: '10월', projects: 42, completed: 30, active: 12 },\n  { name: '11월', projects: 45, completed: 33, active: 12 },\n  { name: '12월', projects: 48, completed: 35, active: 13 }\n]\n\ntype ChartType = 'area' | 'bar'\n\nexport function ProjectChart() {\n  const [chartType, setChartType] = useState<ChartType>('area')\n  const [timeRange, setTimeRange] = useState<'3m' | '6m' | '1y'>('1y')\n\n  // 프로젝트 차트 데이터 쿼리\n  const { data: chartData, isLoading } = useQuery({\n    queryKey: [...queryKeys.analytics.dashboard(), 'chart', timeRange],\n    queryFn: async () => {\n      // TODO: 실제 Supabase 쿼리로 대체\n      await new Promise(resolve => setTimeout(resolve, 500))\n      \n      // 시간 범위에 따른 데이터 필터링\n      const monthsToShow = timeRange === '3m' ? 3 : timeRange === '6m' ? 6 : 12\n      return mockChartData.slice(-monthsToShow)\n    },\n    staleTime: 1000 * 60 * 10, // 10분\n  })\n\n  const renderChart = () => {\n    if (isLoading) {\n      return (\n        <div className=\"h-80 linear-flex-center\">\n          <div className=\"linear-loading linear-loading-lg\"></div>\n        </div>\n      )\n    }\n\n    if (chartType === 'area') {\n      return (\n        <ResponsiveContainer width=\"100%\" height={320}>\n          <AreaChart data={chartData}>\n            <defs>\n              <linearGradient id=\"colorProjects\" x1=\"0\" y1=\"0\" x2=\"0\" y2=\"1\">\n                <stop offset=\"5%\" stopColor=\"var(--linear-accent-blue)\" stopOpacity={0.3} />\n                <stop offset=\"95%\" stopColor=\"var(--linear-accent-blue)\" stopOpacity={0} />\n              </linearGradient>\n              <linearGradient id=\"colorCompleted\" x1=\"0\" y1=\"0\" x2=\"0\" y2=\"1\">\n                <stop offset=\"5%\" stopColor=\"var(--linear-accent-green)\" stopOpacity={0.3} />\n                <stop offset=\"95%\" stopColor=\"var(--linear-accent-green)\" stopOpacity={0} />\n              </linearGradient>\n            </defs>\n            <CartesianGrid strokeDasharray=\"3 3\" stroke=\"var(--linear-border-primary)\" />\n            <XAxis \n              dataKey=\"name\" \n              stroke=\"var(--linear-text-tertiary)\"\n              fontSize={12}\n              tickLine={false}\n            />\n            <YAxis \n              stroke=\"var(--linear-text-tertiary)\"\n              fontSize={12}\n              tickLine={false}\n            />\n            <Tooltip \n              contentStyle={{\n                backgroundColor: 'var(--linear-bg-elevated)',\n                border: '1px solid var(--linear-border-primary)',\n                borderRadius: 'var(--linear-radius-md)',\n                color: 'var(--linear-text-primary)'\n              }}\n            />\n            <Area\n              type=\"monotone\"\n              dataKey=\"projects\"\n              stroke=\"var(--linear-accent-blue)\"\n              fillOpacity={1}\n              fill=\"url(#colorProjects)\"\n              strokeWidth={2}\n            />\n            <Area\n              type=\"monotone\"\n              dataKey=\"completed\"\n              stroke=\"var(--linear-accent-green)\"\n              fillOpacity={1}\n              fill=\"url(#colorCompleted)\"\n              strokeWidth={2}\n            />\n          </AreaChart>\n        </ResponsiveContainer>\n      )\n    }\n\n    return (\n      <ResponsiveContainer width=\"100%\" height={320}>\n        <BarChart data={chartData}>\n          <CartesianGrid strokeDasharray=\"3 3\" stroke=\"var(--linear-border-primary)\" />\n          <XAxis \n            dataKey=\"name\" \n            stroke=\"var(--linear-text-tertiary)\"\n            fontSize={12}\n            tickLine={false}\n          />\n          <YAxis \n            stroke=\"var(--linear-text-tertiary)\"\n            fontSize={12}\n            tickLine={false}\n          />\n          <Tooltip \n            contentStyle={{\n              backgroundColor: 'var(--linear-bg-elevated)',\n              border: '1px solid var(--linear-border-primary)',\n              borderRadius: 'var(--linear-radius-md)',\n              color: 'var(--linear-text-primary)'\n            }}\n          />\n          <Bar \n            dataKey=\"completed\" \n            fill=\"var(--linear-accent-green)\" \n            radius={[4, 4, 0, 0]}\n          />\n          <Bar \n            dataKey=\"active\" \n            fill=\"var(--linear-accent-blue)\" \n            radius={[4, 4, 0, 0]}\n          />\n        </BarChart>\n      </ResponsiveContainer>\n    )\n  }\n\n  return (\n    <div className=\"linear-card\">\n      {/* 차트 헤더 */}\n      <div className=\"linear-flex-between mb-6\">\n        <div>\n          <h3 className=\"linear-title-2 mb-1\">프로젝트 진행 현황</h3>\n          <p className=\"linear-text-small linear-text-tertiary\">\n            시간에 따른 프로젝트 완료 및 진행 상황\n          </p>\n        </div>\n        \n        <div className=\"linear-flex-end linear-gap-sm\">\n          {/* 시간 범위 선택 */}\n          <div className=\"linear-flex rounded-linear-md bg-background-secondary p-1\">\n            {(['3m', '6m', '1y'] as const).map((range) => (\n              <button\n                key={range}\n                onClick={() => setTimeRange(range)}\n                className={`px-3 py-1 rounded-linear-sm linear-text-small transition-all ${\n                  timeRange === range\n                    ? 'bg-accent-blue text-white'\n                    : 'linear-text-tertiary hover:linear-text-secondary'\n                }`}\n              >\n                {range === '3m' ? '3개월' : range === '6m' ? '6개월' : '1년'}\n              </button>\n            ))}\n          </div>\n          \n          {/* 차트 타입 선택 */}\n          <div className=\"linear-flex rounded-linear-md bg-background-secondary p-1\">\n            <button\n              onClick={() => setChartType('area')}\n              className={`p-2 rounded-linear-sm transition-all ${\n                chartType === 'area'\n                  ? 'bg-accent-blue text-white'\n                  : 'linear-text-tertiary hover:linear-text-secondary'\n              }`}\n              title=\"영역 차트\"\n            >\n              <TrendingUp className=\"w-4 h-4\" />\n            </button>\n            <button\n              onClick={() => setChartType('bar')}\n              className={`p-2 rounded-linear-sm transition-all ${\n                chartType === 'bar'\n                  ? 'bg-accent-blue text-white'\n                  : 'linear-text-tertiary hover:linear-text-secondary'\n              }`}\n              title=\"막대 차트\"\n            >\n              <BarChart3 className=\"w-4 h-4\" />\n            </button>\n          </div>\n        </div>\n      </div>\n\n      {/* 범례 */}\n      <div className=\"linear-flex-start linear-gap-lg mb-4\">\n        <div className=\"linear-flex-center linear-gap-xs\">\n          <div className=\"w-3 h-3 rounded-full bg-accent-blue\"></div>\n          <span className=\"linear-text-small linear-text-secondary\">\n            {chartType === 'area' ? '총 프로젝트' : '진행 중'}\n          </span>\n        </div>\n        <div className=\"linear-flex-center linear-gap-xs\">\n          <div className=\"w-3 h-3 rounded-full bg-accent-green\"></div>\n          <span className=\"linear-text-small linear-text-secondary\">\n            완료된 프로젝트\n          </span>\n        </div>\n      </div>\n\n      {/* 차트 */}\n      {renderChart()}\n    </div>\n  )\n}
+import {
+  AreaChart,
+  Area,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  BarChart,
+  Bar
+} from 'recharts'
+import { Calendar, BarChart3, TrendingUp } from 'lucide-react'
+import { queryKeys } from '@/lib/react-query'
+
+// 차트 데이터 타입
+interface ChartData {
+  name: string
+  projects: number
+  completed: number
+  active: number
+}
+
+// 모킹 데이터 (실제로는 Supabase에서 가져옴)
+const mockChartData: ChartData[] = [
+  { name: '1월', projects: 12, completed: 8, active: 4 },
+  { name: '2월', projects: 15, completed: 10, active: 5 },
+  { name: '3월', projects: 18, completed: 12, active: 6 },
+  { name: '4월', projects: 22, completed: 16, active: 6 },
+  { name: '5월', projects: 25, completed: 18, active: 7 },
+  { name: '6월', projects: 28, completed: 20, active: 8 },
+  { name: '7월', projects: 32, completed: 23, active: 9 },
+  { name: '8월', projects: 35, completed: 25, active: 10 },
+  { name: '9월', projects: 38, completed: 28, active: 10 },
+  { name: '10월', projects: 42, completed: 30, active: 12 },
+  { name: '11월', projects: 45, completed: 33, active: 12 },
+  { name: '12월', projects: 48, completed: 35, active: 13 }
+]
+
+type ChartType = 'area' | 'bar'
+
+export function ProjectChart() {
+  const [chartType, setChartType] = useState<ChartType>('area')
+  const [timeRange, setTimeRange] = useState<'3m' | '6m' | '1y'>('1y')
+
+  // 프로젝트 차트 데이터 쿼리
+  const { data: chartData, isLoading } = useQuery({
+    queryKey: [...queryKeys.analytics.dashboard(), 'chart', timeRange],
+    queryFn: async () => {
+      // TODO: 실제 Supabase 쿼리로 대체
+      await new Promise(resolve => setTimeout(resolve, 500))
+
+      // 시간 범위에 따른 데이터 필터링
+      const monthsToShow = timeRange === '3m' ? 3 : timeRange === '6m' ? 6 : 12
+      return mockChartData.slice(-monthsToShow)
+    },
+    staleTime: 1000 * 60 * 10, // 10분
+  })
+
+  const renderChart = () => {
+    if (isLoading) {
+      return (
+        <div className="h-80 linear-flex-center">
+          <div className="linear-loading linear-loading-lg"></div>
+        </div>
+      )
+    }
+
+    if (chartType === 'area') {
+      return (
+        <ResponsiveContainer width="100%" height={320}>
+          <AreaChart data={chartData}>
+            <defs>
+              <linearGradient id="colorProjects" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="5%" stopColor="var(--linear-accent-blue)" stopOpacity={0.3} />
+                <stop offset="95%" stopColor="var(--linear-accent-blue)" stopOpacity={0} />
+              </linearGradient>
+              <linearGradient id="colorCompleted" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="5%" stopColor="var(--linear-accent-green)" stopOpacity={0.3} />
+                <stop offset="95%" stopColor="var(--linear-accent-green)" stopOpacity={0} />
+              </linearGradient>
+            </defs>
+            <CartesianGrid strokeDasharray="3 3" stroke="var(--linear-border-primary)" />
+            <XAxis
+              dataKey="name"
+              stroke="var(--linear-text-tertiary)"
+              fontSize={12}
+              tickLine={false}
+            />
+            <YAxis
+              stroke="var(--linear-text-tertiary)"
+              fontSize={12}
+              tickLine={false}
+            />
+            <Tooltip
+              contentStyle={{
+                backgroundColor: 'var(--linear-bg-elevated)',
+                border: '1px solid var(--linear-border-primary)',
+                borderRadius: 'var(--linear-radius-md)',
+                color: 'var(--linear-text-primary)'
+              }}
+            />
+            <Area
+              type="monotone"
+              dataKey="projects"
+              stroke="var(--linear-accent-blue)"
+              fillOpacity={1}
+              fill="url(#colorProjects)"
+              strokeWidth={2}
+            />
+            <Area
+              type="monotone"
+              dataKey="completed"
+              stroke="var(--linear-accent-green)"
+              fillOpacity={1}
+              fill="url(#colorCompleted)"
+              strokeWidth={2}
+            />
+          </AreaChart>
+        </ResponsiveContainer>
+      )
+    }
+
+    return (
+      <ResponsiveContainer width="100%" height={320}>
+        <BarChart data={chartData}>
+          <CartesianGrid strokeDasharray="3 3" stroke="var(--linear-border-primary)" />
+          <XAxis
+            dataKey="name"
+            stroke="var(--linear-text-tertiary)"
+            fontSize={12}
+            tickLine={false}
+          />
+          <YAxis
+            stroke="var(--linear-text-tertiary)"
+            fontSize={12}
+            tickLine={false}
+          />
+          <Tooltip
+            contentStyle={{
+              backgroundColor: 'var(--linear-bg-elevated)',
+              border: '1px solid var(--linear-border-primary)',
+              borderRadius: 'var(--linear-radius-md)',
+              color: 'var(--linear-text-primary)'
+            }}
+          />
+          <Bar
+            dataKey="completed"
+            fill="var(--linear-accent-green)"
+            radius={[4, 4, 0, 0]}
+          />
+          <Bar
+            dataKey="active"
+            fill="var(--linear-accent-blue)"
+            radius={[4, 4, 0, 0]}
+          />
+        </BarChart>
+      </ResponsiveContainer>
+    )
+  }
+
+  return (
+    <div className="linear-card">
+      {/* 차트 헤더 */}
+      <div className="linear-flex-between mb-6">
+        <div>
+          <h3 className="linear-title-2 mb-1">프로젝트 진행 현황</h3>
+          <p className="linear-text-small linear-text-tertiary">
+            시간에 따른 프로젝트 완료 및 진행 상황
+          </p>
+        </div>
+
+        <div className="linear-flex-end linear-gap-sm">
+          {/* 시간 범위 선택 */}
+          <div className="linear-flex rounded-linear-md bg-background-secondary p-1">
+            {(['3m', '6m', '1y'] as const).map((range) => (
+              <button
+                key={range}
+                onClick={() => setTimeRange(range)}
+                className={`px-3 py-1 rounded-linear-sm linear-text-small transition-all ${
+                  timeRange === range
+                    ? 'bg-accent-blue text-white'
+                    : 'linear-text-tertiary hover:linear-text-secondary'
+                }`}
+              >
+                {range === '3m' ? '3개월' : range === '6m' ? '6개월' : '1년'}
+              </button>
+            ))}
+          </div>
+
+          {/* 차트 타입 선택 */}
+          <div className="linear-flex rounded-linear-md bg-background-secondary p-1">
+            <button
+              onClick={() => setChartType('area')}
+              className={`p-2 rounded-linear-sm transition-all ${
+                chartType === 'area'
+                  ? 'bg-accent-blue text-white'
+                  : 'linear-text-tertiary hover:linear-text-secondary'
+              }`}
+              title="영역 차트"
+            >
+              <TrendingUp className="w-4 h-4" />
+            </button>
+            <button
+              onClick={() => setChartType('bar')}
+              className={`p-2 rounded-linear-sm transition-all ${
+                chartType === 'bar'
+                  ? 'bg-accent-blue text-white'
+                  : 'linear-text-tertiary hover:linear-text-secondary'
+              }`}
+              title="막대 차트"
+            >
+              <BarChart3 className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* 범례 */}
+      <div className="linear-flex-start linear-gap-lg mb-4">
+        <div className="linear-flex-center linear-gap-xs">
+          <div className="w-3 h-3 rounded-full bg-accent-blue"></div>
+          <span className="linear-text-small linear-text-secondary">
+            {chartType === 'area' ? '총 프로젝트' : '진행 중'}
+          </span>
+        </div>
+        <div className="linear-flex-center linear-gap-xs">
+          <div className="w-3 h-3 rounded-full bg-accent-green"></div>
+          <span className="linear-text-small linear-text-secondary">
+            완료된 프로젝트
+          </span>
+        </div>
+      </div>
+
+      {/* 차트 */}
+      {renderChart()}
+    </div>
+  )
+}
