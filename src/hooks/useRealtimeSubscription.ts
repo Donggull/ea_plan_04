@@ -159,7 +159,7 @@ export function useDocumentRealtimeSubscription(projectId?: string) {
   return useRealtimeSubscription({
     table: 'documents',
     filter: projectId ? `project_id=eq.${projectId}` : undefined,
-    onInsert: (payload) => {
+    onInsert: () => {
       // 문서 목록 쿼리 무효화
       queryClient.invalidateQueries({
         queryKey: queryKeys.documents.lists(),
@@ -193,7 +193,7 @@ export function useActivityRealtimeSubscription() {
 
   return useRealtimeSubscription({
     table: 'activities',
-    onInsert: (payload) => {
+    onInsert: () => {
       // 최근 활동 쿼리 무효화
       queryClient.invalidateQueries({
         queryKey: queryKeys.analytics.activity(),
@@ -210,7 +210,7 @@ export function useImageGenerationRealtimeSubscription() {
 
   return useRealtimeSubscription({
     table: 'generated_images',
-    onInsert: (payload) => {
+    onInsert: () => {
       // 이미지 목록 쿼리 무효화
       queryClient.invalidateQueries({
         queryKey: queryKeys.images.lists(),
@@ -228,15 +228,15 @@ export function useImageGenerationRealtimeSubscription() {
 function getQueryKeysForTable(table: string): string[] {
   switch (table) {
     case 'projects':
-      return queryKeys.projects.all
+      return [...queryKeys.projects.all]
     case 'documents':
-      return queryKeys.documents.all
+      return [...queryKeys.documents.all]
     case 'users':
-      return queryKeys.users.all
+      return [...queryKeys.users.all]
     case 'activities':
-      return queryKeys.analytics.all
+      return [...queryKeys.analytics.all]
     case 'generated_images':
-      return queryKeys.images.all
+      return [...queryKeys.images.all]
     default:
       return []
   }

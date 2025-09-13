@@ -109,22 +109,6 @@ export function RecentActivity() {
     }
   }
 
-  const getActivityColor = (type: Activity['type'], action: string) => {
-    switch (type) {
-      case 'project':
-        return action === 'completed' ? 'linear-accent-green' : 'linear-accent-blue'
-      case 'image':
-        return 'linear-accent-orange'
-      case 'chat':
-        return 'linear-accent-plan'
-      case 'team':
-        return 'linear-accent-security'
-      case 'system':
-        return 'linear-accent-build'
-      default:
-        return 'linear-text-muted'
-    }
-  }
 
   if (isLoading) {
     return (

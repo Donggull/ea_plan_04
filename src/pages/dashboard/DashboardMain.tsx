@@ -1,7 +1,6 @@
 import { useEffect } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import {
-  BarChart3,
   Users,
   FolderOpen,
   ImageIcon,

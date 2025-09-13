@@ -11,7 +11,7 @@ import {
   BarChart,
   Bar
 } from 'recharts'
-import { Calendar, BarChart3, TrendingUp } from 'lucide-react'
+import { BarChart3, TrendingUp } from 'lucide-react'
 import { queryKeys } from '@/lib/react-query'
 
 // 차트 데이터 타입
