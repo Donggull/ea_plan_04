@@ -55,8 +55,8 @@ export function MainLayout() {
         <main
           className={cn(
             'flex-1 transition-all duration-300 ease-out',
-            // 사이드바가 열려있을 때 마진 조정 (데스크톱만)
-            !isMobile && isSidebarOpen ? 'lg:ml-64 xl:ml-80' : 'ml-0'
+            // PRD 규칙: 사이드바는 w-64 (256px) 고정
+            !isMobile && isSidebarOpen ? 'lg:ml-64' : 'ml-0'
           )}
           style={{
             paddingTop: '0',

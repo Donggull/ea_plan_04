@@ -41,7 +41,9 @@
       "mcp__playwright-stealth__playwright_evaluate",
       "mcp__playwright-stealth__playwright_fill",
       "mcp__playwright-stealth__playwright_click",
-      "mcp__github-mcp__git-diff"
+      "mcp__github-mcp__git-diff",
+      "Read(//c/Users/dg.an/Downloads/**)",
+      "mcp__playwright-stealth__playwright_get_visible_html"
     ],
     "deny": [],
     "ask": []
