@@ -6,6 +6,7 @@ import { Sidebar } from './Sidebar'
 export function MainLayout() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
+  const [sidebarWidth, setSidebarWidth] = useState(280) // 기본 사이드바 너비
 
   // 화면 크기 감지
   useEffect(() => {
@@ -40,6 +41,10 @@ export function MainLayout() {
     }
   }
 
+  const handleSidebarWidthChange = (width: number) => {
+    setSidebarWidth(width)
+  }
+
   return (
     <div className="min-h-screen" style={{ backgroundColor: 'var(--linear-bg-primary)' }}>
       {/* Header */}
@@ -48,10 +53,20 @@ export function MainLayout() {
       {/* Layout Container */}
       <div className="flex h-[calc(100vh-64px)]">
         {/* Sidebar */}
-        <Sidebar isOpen={isSidebarOpen} onClose={closeSidebar} />
+        <Sidebar
+          isOpen={isSidebarOpen}
+          onClose={closeSidebar}
+          width={sidebarWidth}
+          onWidthChange={handleSidebarWidthChange}
+        />
 
         {/* Main Content Area */}
-        <main className="flex-1 overflow-auto lg:ml-0">
+        <main
+          className="flex-1 overflow-auto transition-all duration-300 ease-out"
+          style={{
+            marginLeft: !isMobile && isSidebarOpen ? `${sidebarWidth}px` : '0',
+          }}
+        >
           <div
             className="w-full h-full"
             style={{
