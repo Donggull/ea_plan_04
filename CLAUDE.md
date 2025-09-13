@@ -1,4 +1,4 @@
-# CLAUDE.md
+# ELUO 프로젝트 - Claude Code 개발 가이드
 
 **모든 진행 설명은 한글로 출력해줘.**
 **모든 디자인 작업은 /docs/linear_theme.json를 바탕으로 일반화, 중앙화하여 만들어줘. 트랜디 하고 세련되게 디자인 작업 진행해줘**
@@ -19,400 +19,239 @@ git은 Donggull/ea_plan_04의 master 브랜치에 커밋과 푸시를 진행하�
 **기존에 적용되어 있는 인증 관련 부분은 동의없이 임의로 절대 수정 변경하지마. 전체 페이지에 적용되어 있는 인증 페이지와 충돌이 발생할 수 있으니 변경이 필요한 경우 반드시 동의를 구하고 진행해야돼.**
 
 
-# ELUO 프로젝트 - Claude Code 개발 가이드
+## 🎯 프로젝트 목표
+Vite + React 19 + TypeScript + Supabase를 사용하여 ELUO 프로젝트 관리 시스템을 구축합니다.
 
-## 🎯 프로젝트 개요
-ELUO는 **Vite + React 19 + Supabase** 기반의 AI 통합 프로젝트 관리 플랫폼입니다. 제안서 작성부터 구축, 운영까지 전 과정을 AI가 지원하는 통합 솔루션을 개발합니다.
+## 📁 프로젝트 구조
+```
+ELUO 프로젝트
+├── docs/
+│   ├── project_plan.md          # 프로젝트 계획
+│   ├── prd_main_vite.md         # 메인 PRD
+│   ├── prd_ui_ux_vite.md        # UI/UX 가이드
+│   ├── claude_code_prompts_vite.md  # 개발 프롬프트
+│   └── prd_database_vite.md     # 데이터베이스 설계
+└── [개발할 프로젝트 루트]
+```
 
-## 📚 필수 문서 읽기
-Claude Code로 개발하기 전에 다음 문서들을 반드시 읽어주세요:
+## 🚀 Claude Code 개발 시작 가이드
 
-### 1️⃣ 핵심 문서 (필수)
-- `docs/prd_main.md` - 프로젝트 전체 개요 및 비전
-- `docs/prd_technical.md` - Vite + React 19 기술 사양
-- `docs/vite_react19_prompts.md` - 단계별 개발 프롬프트
-
-### 2️⃣ 상세 문서 (참조)
-- `docs/prd_features.md` - 기능 명세서
-- `docs/prd_ui_ux.md` - UI/UX 가이드
-- `docs/prd_api_integration.md` - AI 및 API 통합
-- `docs/prd_database.md` - 데이터베이스 설계
-- `docs/supabase_integration.md` - Supabase 연동 가이드
-- `docs/react19_features.md` - React 19 기능 활용법
-
-## 🚀 빠른 시작 (Claude Code용)
-
-### Phase 0: 프로젝트 초기 설정
+### 1단계: 프로젝트 초기화
 ```bash
-# Claude Code에서 실행할 명령어들
-npm create vite@latest eluo-platform -- --template react-ts
-cd eluo-platform
 
-# React 19 업그레이드
-npm install react@19 react-dom@19
-npm install -D @types/react@19 @types/react-dom@19
 
-# 필수 패키지 설치
-npm install @supabase/supabase-js zustand @tanstack/react-query react-router-dom
-npm install react-hook-form @hookform/resolvers zod
-npm install @radix-ui/react-dialog @radix-ui/react-dropdown-menu
-npm install lucide-react clsx tailwind-merge
+# Vite 프로젝트 생성
+npm create vite@latest eluo-project -- --template react-ts
+cd eluo-project
 
-# 개발 도구 설치
+# React 19 RC 설치
+npm install react@rc react-dom@rc
+```
+
+### 2단계: 필수 패키지 설치
+```bash
+# Supabase 및 인증
+npm install @supabase/supabase-js
+
+# 상태 관리 및 데이터 페칭
+npm install zustand @tanstack/react-query
+
+# 라우팅
+npm install react-router-dom
+
+# 폼 처리
+npm install react-hook-form zod @hookform/resolvers
+
+# UI 컴포넌트 (Radix UI)
+npm install @radix-ui/react-dialog @radix-ui/react-dropdown-menu @radix-ui/react-select @radix-ui/react-tabs @radix-ui/react-toast
+
+# 아이콘 및 차트
+npm install lucide-react recharts
+
+# 스타일링
 npm install -D tailwindcss postcss autoprefixer
-npm install -D @types/node
-npm install -D vitest @vitest/ui jsdom
-npm install -D prettier eslint-config-prettier
+npm install clsx tailwind-merge class-variance-authority
+
+# 개발 도구
+npm install -D @types/react @types/react-dom eslint prettier vitest @playwright/test
 ```
 
-## 📋 단계별 개발 프롬프트
+### 3단계: Supabase 프로젝트 설정
+1. [Supabase Dashboard](https://app.supabase.com)에서 새 프로젝트 생성
+2. 프로젝트명: `eluo-project`
+3. 지역: Singapore (또는 가장 가까운 지역)
+4. 환경 변수 수집:
+   - Project URL
+   - Anon Key
+   - Service Role Key (선택)
 
-### Phase 1: 기본 프로젝트 구조 (1주차)
-Claude Code에서 다음과 같이 요청하세요:
-
-```
-docs/vite_react19_prompts.md 파일의 Phase 1 프롬프트를 참조하여 다음을 구현해주세요:
-
-1. Vite + React 19 프로젝트 기본 설정
-   - vite.config.ts 최적화 설정
-   - tsconfig.json React 19 설정
-   - tailwind.config.js 설정
-
-2. 기본 폴더 구조 생성
-   - src/components (ui, layout, shared)
-   - src/pages
-   - src/hooks
-   - src/stores
-   - src/lib
-   - src/types
-
-3. ShadCN/UI 컴포넌트 시스템 설정
-   - Button, Input, Card, Dialog 등 기본 컴포넌트
-   - Tailwind CSS 통합
-
-문서의 정확한 가이드라인에 따라 구현해주세요.
-```
-
-### Phase 2: Supabase 연동 (2주차)
-```
-docs/supabase_integration.md와 docs/prd_database.md를 참조하여:
-
-1. Supabase 클라이언트 설정
-   - lib/supabase/client.ts 생성
-   - 환경변수 설정 (.env.local)
-   - TypeScript 타입 생성
-
-2. 인증 시스템 구현
-   - 로그인/회원가입 페이지
-   - useAuth 훅 구현
-   - RLS 정책 적용
-
-3. 기본 데이터베이스 스키마 생성
-   - user_profiles, projects 테이블
-   - RLS 정책 설정
-
-React 19의 useFormState, useFormStatus를 활용한 현대적인 폼 구현을 포함해주세요.
-```
-
-### Phase 3: AI 통합 기반 (3주차)
-```
-docs/prd_api_integration.md를 참조하여 AI 서비스 통합을 구현해주세요:
-
-1. AI 서비스 매니저 구현
-   - OpenAI, Google Gemini, Anthropic Claude 통합
-   - 멀티 모델 지원 아키텍처
-   - 토큰 사용량 추적
-
-2. React 19 기반 AI 채팅 인터페이스
-   - useOptimistic을 활용한 즉각적인 메시지 표시
-   - 실시간 타이핑 효과
-   - 에러 처리 및 재시도
-
-3. 기본 RAG 시스템 구현
-   - 문서 업로드 및 벡터화
-   - pgvector를 활용한 유사도 검색
-
-React 19의 새로운 기능들을 적극 활용해주세요.
-```
-
-### Phase 4: 프로젝트 관리 모듈 (4-5주차)
-```
-docs/prd_features.md의 기획 모듈 섹션을 참조하여:
-
-1. 프로젝트 CRUD 구현
-   - useOptimistic으로 즉각적인 UI 업데이트
-   - 실시간 협업 기능 (Supabase Realtime)
-   - 프로젝트 대시보드
-
-2. 문서 업로드 및 관리
-   - Drag & Drop 파일 업로드
-   - OCR 텍스트 추출
-   - AI 기반 문서 분석
-
-3. 요구사항 관리 시스템
-   - CRUD 작업 with React 19 hooks
-   - 상태 관리 (Zustand)
-   - 실시간 업데이트
-
-모든 컴포넌트는 React 19의 새로운 기능을 활용하여 구현해주세요.
-```
-
-### Phase 5: 제안 진행 모듈 (6-7주차)
-```
-docs/prd_features.md의 제안 진행 영역을 참조하여:
-
-1. RFP 분석 시스템
-   - 파일 업로드 및 OCR 처리
-   - AI 기반 요구사항 추출
-   - 분석 결과 시각화
-
-2. 시장 조사 자동화
-   - 웹 검색 API 통합
-   - AI 기반 시장 분석
-   - 경쟁사 정보 수집
-
-3. 제안서 자동 생성
-   - 템플릿 기반 생성
-   - AI 기반 내용 자동 완성
-   - 실시간 협업 편집
-
-useDeferredValue를 활용한 검색 최적화도 포함해주세요.
-```
-
-### Phase 6: 이미지 생성 및 고급 기능 (8-9주차)
-```
-docs/prd_api_integration.md의 이미지 생성 섹션을 참조하여:
-
-1. AI 이미지 생성 시스템
-   - DALL-E, Flux 통합
-   - 프롬프트 최적화
-   - 이미지 라이브러리 관리
-
-2. 고급 AI 기능
-   - 커스텀 챗봇 빌더
-   - RAG 기반 지식 검색
-   - 다중 AI 모델 활용
-
-3. 성능 최적화
-   - React 19 Concurrent Features 활용
-   - Vite 번들 최적화
-   - 메모리 최적화
-
-React 19의 useTransition과 Suspense를 적극 활용해주세요.
-```
-
-## ⚙️ 개발 환경 설정
-
-### 필수 환경변수 (.env.local)
+### 4단계: 환경 변수 설정
+`.env.local` 파일 생성:
 ```env
-# Supabase
-VITE_SUPABASE_URL=your_supabase_url
-VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
-
-# AI 서비스
-VITE_OPENAI_API_KEY=your_openai_key
-VITE_ANTHROPIC_API_KEY=your_anthropic_key
-VITE_GOOGLE_API_KEY=your_google_key
-
-# 기타
-VITE_APP_ENV=development
+VITE_SUPABASE_URL=your-project-url
+VITE_SUPABASE_ANON_KEY=your-anon-key
 ```
 
-### Vite 설정 (vite.config.ts)
-```typescript
-import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react'
-import { resolve } from 'path'
+### 5단계: 데이터베이스 테이블 생성
+`docs/prd_database_vite.md`의 SQL 스크립트를 Supabase SQL Editor에서 실행:
+1. Extensions 활성화
+2. 테이블 생성 (순서대로)
+3. RLS 정책 적용
+4. 트리거 및 함수 생성
+5. Storage 버킷 생성
 
-export default defineConfig({
-  plugins: [react()],
-  resolve: {
-    alias: {
-      '@': resolve(__dirname, './src')
-    }
-  },
-  server: {
-    port: 3000,
-    open: true
-  },
-  build: {
-    target: 'esnext',
-    rollupOptions: {
-      output: {
-        manualChunks: {
-          vendor: ['react', 'react-dom'],
-          supabase: ['@supabase/supabase-js'],
-          ai: ['openai', '@google/generative-ai']
-        }
-      }
-    }
-  }
-})
+## 📝 개발 순서 (Phase별)
+
+### Phase 0: Supabase 연동 ✅
+- [ ] Supabase 프로젝트 생성
+- [ ] 환경 변수 설정
+- [ ] 데이터베이스 테이블 생성
+- [ ] TypeScript 타입 생성
+
+### Phase 1: 기본 구조 설정
+- [ ] 프로젝트 디렉토리 구조 생성
+- [ ] Tailwind CSS 설정
+- [ ] Vite 설정 (경로 별칭 등)
+- [ ] ESLint/Prettier 설정
+- [ ] Supabase 클라이언트 설정
+
+### Phase 2: 인증 시스템
+- [ ] Supabase Auth 설정
+- [ ] 로그인/회원가입 페이지
+- [ ] AuthContext 구현
+- [ ] 보호된 라우트
+- [ ] 프로필 관리
+
+### Phase 3: 메인 페이지 및 대시보드
+- [ ] 라우터 설정
+- [ ] 메인 레이아웃
+- [ ] Hero 섹션
+- [ ] 대시보드 페이지
+- [ ] 사이드바/헤더
+
+### Phase 4: 프로젝트 관리
+- [ ] 프로젝트 CRUD
+- [ ] 멤버 관리
+- [ ] 문서 업로드
+- [ ] 실시간 동기화
+
+### Phase 5: AI 통합
+- [ ] AI 서비스 설정
+- [ ] 문서 분석
+- [ ] 벡터 검색
+- [ ] 결과 시각화
+
+### Phase 6: 운영 기능
+- [ ] 제안 모듈
+- [ ] 구축 모듈
+- [ ] 운영 모듈
+- [ ] 보고서 생성
+
+## 🛠 주요 파일 구조
+
+```
+src/
+├── components/
+│   ├── ui/              # 기본 UI 컴포넌트
+│   ├── layouts/         # 레이아웃 컴포넌트
+│   └── features/        # 기능별 컴포넌트
+├── pages/              # 페이지 컴포넌트
+├── lib/                # 유틸리티 및 설정
+│   ├── supabase.ts     # Supabase 클라이언트
+│   └── queries/        # React Query 함수
+├── hooks/              # 커스텀 훅
+├── stores/             # Zustand 스토어
+├── types/              # TypeScript 타입
+├── styles/             # 스타일 파일
+└── App.tsx            # 메인 앱 컴포넌트
 ```
 
-## 🎨 컴포넌트 스타일 가이드
+## 💻 주요 명령어
 
-### React 19 컴포넌트 예시
-```typescript
-// useOptimistic 활용 예시
-function OptimisticButton({ onClick, children }) {
-  const [isPending, startTransition] = useTransition()
-  
-  const handleClick = () => {
-    startTransition(async () => {
-      await onClick()
-    })
-  }
-
-  return (
-    <button 
-      onClick={handleClick}
-      disabled={isPending}
-      className="btn-primary"
-    >
-      {isPending ? '처리 중...' : children}
-    </button>
-  )
-}
-
-// use() Hook 활용 예시
-function DataComponent({ dataPromise }) {
-  const data = use(dataPromise)
-  
-  return <div>{data.title}</div>
-}
-```
-
-### Tailwind CSS 클래스 명명 규칙
-```css
-/* 컴포넌트별 접두사 사용 */
-.btn-primary { @apply bg-blue-600 text-white px-4 py-2 rounded-lg; }
-.card-default { @apply bg-white rounded-xl border shadow-sm; }
-.input-field { @apply border border-gray-300 rounded-lg px-3 py-2; }
-```
-
-## 🧪 테스트 전략
-
-### 단위 테스트 (Vitest)
-```typescript
-// __tests__/components/Button.test.tsx
-import { render, screen } from '@testing-library/react'
-import { Button } from '@/components/ui/button'
-
-test('renders button correctly', () => {
-  render(<Button>Click me</Button>)
-  expect(screen.getByRole('button')).toHaveTextContent('Click me')
-})
-```
-
-### E2E 테스트 설정
 ```bash
-npm install -D @playwright/test
-npx playwright install
+# 개발 서버 실행
+npm run dev
+
+# 타입 체크
+npm run type-check
+
+# Supabase 타입 생성
+npm run generate-types
+
+# 빌드
+npm run build
+
+# 테스트
+npm run test
+
+# E2E 테스트
+npm run test:e2e
 ```
 
-## 📦 패키지 관리
+## 📚 참고 문서 위치
+- **메인 PRD**: `docs/prd_main_vite.md`
+- **UI/UX 가이드**: `docs/prd_ui_ux_vite.md`
+- **개발 프롬프트**: `docs/claude_code_prompts_vite.md`
+- **데이터베이스 설계**: `docs/prd_database_vite.md`
 
-### 핵심 의존성
-```json
-{
-  "dependencies": {
-    "react": "^19.0.0",
-    "react-dom": "^19.0.0",
-    "@supabase/supabase-js": "^2.45.0",
-    "zustand": "^4.4.0",
-    "@tanstack/react-query": "^5.0.0",
-    "react-router-dom": "^6.18.0",
-    "react-hook-form": "^7.47.0",
-    "zod": "^3.22.0",
-    "tailwindcss": "^3.3.0",
-    "lucide-react": "^0.290.0"
-  }
-}
-```
+## 🔍 개발 시 확인사항
 
-## 🔧 개발 도구
+### 각 Phase 완료 전 체크리스트
+- [ ] TypeScript 타입 에러 없음
+- [ ] ESLint 경고 해결
+- [ ] 컴포넌트 props 타입 정의
+- [ ] Supabase 쿼리 에러 처리
+- [ ] 로딩/에러 상태 UI
+- [ ] 반응형 디자인 확인
+- [ ] 다크 모드 지원
 
-### VS Code 권장 확장
-- ES7+ React/Redux/React-Native snippets
-- Tailwind CSS IntelliSense
-- TypeScript Importer
-- Auto Rename Tag
-- Prettier - Code formatter
+### Supabase 연동 확인
+- [ ] 테이블 생성 완료
+- [ ] RLS 정책 적용
+- [ ] 실시간 구독 설정
+- [ ] Storage 버킷 생성
+- [ ] Auth 설정 완료
 
-### 유용한 스니펫
-```json
-// React 19 함수형 컴포넌트
-{
-  "React 19 Component": {
-    "prefix": "r19c",
-    "body": [
-      "import { use, useOptimistic, useTransition } from 'react'",
-      "",
-      "interface ${1:Component}Props {",
-      "  ${2:prop}: ${3:string}",
-      "}",
-      "",
-      "export function ${1:Component}({ ${2:prop} }: ${1:Component}Props) {",
-      "  return (",
-      "    <div>",
-      "      $0",
-      "    </div>",
-      "  )",
-      "}"
-    ]
-  }
-}
-```
+## 🎨 UI/UX 핵심 원칙
+1. **Tailwind CSS 우선**: 모든 스타일링은 Tailwind 유틸리티 클래스 사용
+2. **컴포넌트 기반**: 재사용 가능한 컴포넌트 설계
+3. **타입 안정성**: 모든 컴포넌트와 함수에 TypeScript 타입 적용
+4. **반응형 필수**: 모바일 우선 디자인
+5. **접근성 준수**: ARIA labels, 키보드 네비게이션
 
-## 🚨 중요 주의사항
+## 🚦 개발 우선순위
+1. **핵심 기능 우선**: 인증 → 프로젝트 관리 → 문서 관리
+2. **사용자 경험 중심**: 로딩 상태, 에러 처리, 피드백
+3. **성능 최적화**: React.lazy, useMemo, useCallback 활용
+4. **보안 우선**: RLS 정책, 입력 검증, XSS 방지
 
-### React 19 마이그레이션
-1. **StrictMode 사용**: 개발 중 잠재적 문제 발견
-2. **Concurrent Features**: useTransition, useDeferredValue 적극 활용
-3. **New Hooks**: useOptimistic, use(), useFormState 활용
-4. **Error Boundaries**: 컴포넌트 에러 처리 강화
+## ⚠️ 주의사항
+- React 19는 RC 버전이므로 일부 기능이 변경될 수 있음
+- Supabase 무료 티어 제한 확인 (500MB 스토리지, 2GB 대역폭)
+- 환경 변수는 VITE_ 접두사 필수
+- 빌드 시 타입 체크 필수
 
-### Vite 최적화
-1. **HMR 활용**: 빠른 개발 피드백 루프
-2. **Code Splitting**: 청크 최적화로 로딩 성능 향상
-3. **Tree Shaking**: 불필요한 코드 제거
-4. **Asset Optimization**: 이미지, 폰트 최적화
-
-### Supabase 베스트 프랙티스
-1. **RLS 정책**: 모든 테이블에 적절한 보안 정책 적용
-2. **Real-time 구독**: 메모리 누수 방지를 위한 구독 해제
-3. **Type Safety**: Supabase CLI로 타입 생성
-4. **Edge Functions**: 서버사이드 로직 처리
-
-## 🎯 개발 우선순위
-
-### 1차 목표 (4주)
-- [x] 프로젝트 기본 구조 설정
-- [ ] Supabase 인증 시스템
-- [ ] 기본 AI 채팅 인터페이스
-- [ ] 프로젝트 CRUD 구현
-
-### 2차 목표 (8주)
-- [ ] 제안 진행 모듈 완성
-- [ ] 구축 관리 모듈 완성
-- [ ] 이미지 생성 시스템
-- [ ] RAG 기반 검색
-
-### 3차 목표 (13주)
-- [ ] 운영 관리 모듈
-- [ ] 성능 최적화
-- [ ] PWA 기능
-- [ ] 배포 및 모니터링
-
-## 📞 지원 및 문의
-
-개발 중 문제가 발생하면 다음 문서들을 참조하세요:
-- 기술적 문제: `docs/prd_technical.md`
-- 기능 구현: `docs/prd_features.md`
-- API 통합: `docs/prd_api_integration.md`
-- UI/UX: `docs/prd_ui_ux.md`
+## 🔗 유용한 링크
+- [Vite 문서](https://vitejs.dev/)
+- [React 19 RC 문서](https://react.dev/blog/2024/04/25/react-19)
+- [Supabase 문서](https://supabase.com/docs)
+- [Tailwind CSS 문서](https://tailwindcss.com/docs)
+- [Radix UI 문서](https://www.radix-ui.com/)
 
 ---
 
-**이 가이드를 따라 Claude Code에서 단계적으로 개발을 진행하세요. 각 Phase별로 해당 프롬프트를 사용하여 체계적으로 구현할 수 있습니다.**
+## 🎯 시작하기
+
+Claude Code에서 이 프로젝트를 개발하려면:
+
+1. 이 문서를 참고하여 단계별로 진행
+2. 각 Phase의 체크리스트를 완료
+3. `docs/` 폴더의 PRD 문서들을 상세 가이드로 활용
+4. 문제 발생 시 관련 PRD 문서 확인
+
+**현재 상태**: Phase 0 - Supabase 프로젝트 생성 대기 중
+
+**다음 작업**: 
+1. Vite 프로젝트 초기화
+2. 패키지 설치
+3. Supabase 프로젝트 생성 및 연동

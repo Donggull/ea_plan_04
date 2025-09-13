@@ -1,3 +1,235 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* ========================================
+   ELUO 프로젝트 - Linear Theme 기반 Global CSS
+   docs/linear_theme.json의 중앙화된 디자인 시스템
+   ======================================== */
+
+:root {
+  /* Linear Theme CSS Variables */
+  --linear-bg-primary: #080910;
+  --linear-bg-secondary: #101113;
+  --linear-bg-tertiary: #202124;
+  --linear-bg-elevated: #2a2d30;
+
+  --linear-text-primary: #f7f8f8;
+  --linear-text-secondary: #d0d6e0;
+  --linear-text-tertiary: #8a8f98;
+  --linear-text-muted: #636871;
+  --linear-text-disabled: #4a4e57;
+
+  --linear-border-primary: #2a2d30;
+  --linear-border-secondary: #1f2124;
+  --linear-border-focus: #4ea7fc;
+
+  --linear-accent-blue: #4ea7fc;
+  --linear-accent-red: #eb5757;
+  --linear-accent-green: #4cb782;
+  --linear-accent-orange: #fc7840;
+  --linear-accent-yellow: #f2c94c;
+  --linear-accent-indigo: #5e6ad2;
+
+  --linear-accent-plan: #68cc58;
+  --linear-accent-build: #d4b144;
+  --linear-accent-security: #7a7fad;
+
+  --linear-font-primary: "Inter Variable", "SF Pro Display", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --linear-font-serif: "Tiempos Headline", ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
+  --linear-font-mono: "Berkeley Mono", ui-monospace, "SF Mono", "Menlo", monospace;
+
+  --linear-radius-sm: 4px;
+  --linear-radius-md: 8px;
+  --linear-radius-lg: 12px;
+  --linear-radius-xl: 16px;
+
+  --linear-spacing-xs: 4px;
+  --linear-spacing-sm: 8px;
+  --linear-spacing-md: 16px;
+  --linear-spacing-lg: 24px;
+  --linear-spacing-xl: 32px;
+
+  --linear-header-height: 64px;
+  --linear-container-max-width: 1024px;
+
+  --linear-animation-fast: 0.1s;
+  --linear-animation-normal: 0.25s;
+  --linear-animation-slow: 0.5s;
+  --linear-ease-out: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+
+  --linear-focus-ring: 2px solid var(--linear-accent-blue);
+}
+
+/* Light Mode Variables */
+[data-theme="light"] {
+  --linear-bg-primary: #ffffff;
+  --linear-bg-secondary: #f8f9fa;
+  --linear-bg-tertiary: #e9ecef;
+  --linear-bg-elevated: #ffffff;
+
+  --linear-text-primary: #1a1a1a;
+  --linear-text-secondary: #4a4e57;
+  --linear-text-tertiary: #636871;
+  --linear-text-muted: #8a8f98;
+  --linear-text-disabled: #d0d6e0;
+
+  --linear-border-primary: #e9ecef;
+  --linear-border-secondary: #dee2e6;
+}
+
+/* Base Styles */
+* {
+  box-sizing: border-box;
+}
+
+html {
+  font-family: var(--linear-font-primary);
+  line-height: 1.4;
+  letter-spacing: -0.012em;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  background-color: var(--linear-bg-primary);
+  color: var(--linear-text-primary);
+  transition: background-color var(--linear-animation-normal) var(--linear-ease-out),
+              color var(--linear-animation-normal) var(--linear-ease-out);
+}
+
+/* Scrollbar Styling */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--linear-bg-secondary);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--linear-border-primary);
+  border-radius: var(--linear-radius-sm);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--linear-text-tertiary);
+}
+
+/* Focus Ring */
+*:focus-visible {
+  outline: var(--linear-focus-ring);
+  outline-offset: 2px;
+}
+
+/* Selection */
+::selection {
+  background-color: var(--linear-accent-blue);
+  color: white;
+}
+
+/* Component Base Classes */
+.linear-card {
+  background: var(--linear-bg-secondary);
+  border: 1px solid var(--linear-border-primary);
+  border-radius: var(--linear-radius-lg);
+  padding: var(--linear-spacing-lg);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.linear-button-primary {
+  background: var(--linear-accent-blue);
+  color: white;
+  border: none;
+  border-radius: var(--linear-radius-md);
+  padding: 12px 24px;
+  font-size: 0.9375rem;
+  font-weight: 510;
+  font-family: var(--linear-font-primary);
+  cursor: pointer;
+  transition: all var(--linear-animation-fast) var(--linear-ease-out);
+}
+
+.linear-button-primary:hover {
+  background: #38bdf8;
+  transform: translateY(-1px);
+}
+
+.linear-button-secondary {
+  background: transparent;
+  color: var(--linear-text-tertiary);
+  border: 1px solid var(--linear-border-primary);
+  border-radius: var(--linear-radius-md);
+  padding: 12px 24px;
+  font-size: 0.9375rem;
+  font-weight: 400;
+  font-family: var(--linear-font-primary);
+  cursor: pointer;
+  transition: all var(--linear-animation-fast) var(--linear-ease-out);
+}
+
+.linear-button-secondary:hover {
+  background: var(--linear-bg-secondary);
+  color: var(--linear-text-secondary);
+}
+
+.linear-input {
+  background: var(--linear-bg-secondary);
+  border: 1px solid var(--linear-border-primary);
+  border-radius: var(--linear-radius-md);
+  padding: 12px 16px;
+  font-size: 0.9375rem;
+  color: var(--linear-text-primary);
+  font-family: var(--linear-font-primary);
+  width: 100%;
+  transition: all var(--linear-animation-fast) var(--linear-ease-out);
+}
+
+.linear-input::placeholder {
+  color: var(--linear-text-tertiary);
+}
+
+.linear-input:focus {
+  border-color: var(--linear-accent-blue);
+  outline: 2px solid var(--linear-accent-blue);
+  outline-offset: 2px;
+}
+
+/* Navigation */
+.linear-navigation {
+  background: rgba(10, 10, 10, 0.8);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--linear-border-primary);
+  height: var(--linear-header-height);
+  padding: 0 var(--linear-spacing-lg);
+}
+
+/* Typography Classes */
+.linear-title-1 { font-size: 1.0625rem; font-weight: 590; line-height: 1.1; }
+.linear-title-2 { font-size: 1.3125rem; font-weight: 590; line-height: 1.1; }
+.linear-title-3 { font-size: 1.5rem; font-weight: 590; line-height: 1.1; }
+.linear-title-4 { font-size: 2rem; font-weight: 680; line-height: 1.1; }
+.linear-title-5 { font-size: 2.5rem; font-weight: 680; line-height: 1.1; }
+
+.linear-text-regular { font-size: 0.9375rem; font-weight: 400; }
+.linear-text-small { font-size: 0.8125rem; font-weight: 400; }
+.linear-text-mini { font-size: 0.75rem; font-weight: 400; }
+
+/* Accent Color Classes */
+.linear-accent-plan { color: var(--linear-accent-plan); }
+.linear-accent-build { color: var(--linear-accent-build); }
+.linear-accent-security { color: var(--linear-accent-security); }
+.linear-accent-blue { color: var(--linear-accent-blue); }
+.linear-accent-green { color: var(--linear-accent-green); }
+.linear-accent-red { color: var(--linear-accent-red); }
+.linear-accent-orange { color: var(--linear-accent-orange); }
+
+/* Container */
+.linear-container {
+  max-width: var(--linear-container-max-width);
+  margin: 0 auto;
+  padding: 0 var(--linear-spacing-lg);
+}
